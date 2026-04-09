@@ -1,0 +1,67 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: wizlist_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: wizlist
+      MYSQL_USER: wizuser
+      MYSQL_PASSWORD: wizpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - wizlist-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: wizlist_backend
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: wizlist
+      DB_USER: wizuser
+      DB_PASSWORD: wizpassword
+      SECRET_KEY: cambia_esto_en_produccion
+      FLASK_ENV: development
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - wizlist-net
+
+  frontend:
+    build: ./frontend
+    container_name: wizlist_frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:5000
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - wizlist-net
+
+volumes:
+  mysql_data:
+
+networks:
+  wizlist-net:
+    driver: bridge
