@@ -1,21 +1,26 @@
 import { Link } from "react-router-dom";
-import type { Character } from "../App"
 
-interface Props {
-    character: Character
-}
 
-function Card({character}: Props){
+function Card(){
 
     return(
-        <>
+         <div className="card card-side bg-indigo-600 shadow-sm h-48">
         <Link to={`/detail/${character.id}`}>
-            <div className="w-[100px] h-[100px] overflow-hidden rounded">
-                <img className="w-full h-full object-cover object-top" src={character.image || 'https://scbaking.com/global/assets/images/unavailable.png'} alt={character.name}/>
-            </div>
+            <figure className="h-full w-40">
+                <img className="w-full h-full object-cover rounded-lg"
+                src= {character.attributes.image || '../../images/image_not_provided.png'} 
+                alt= {character.attributes.slug} />
+            </figure>
         </Link>
-            <div>{character.name}</div>
-        </>
-    )
+        
+        <div className="card-body">
+            <h2 className="card-title">{character.attributes.slug}</h2>
+            <p>Click the button to add it to the list</p>
+            <div className="card-actions justify-end">
+                <button className="btn btn-primary p-5">Add</button>
+            </div>
+        </div>
+    </div>
+    );
 }
 export default Card;

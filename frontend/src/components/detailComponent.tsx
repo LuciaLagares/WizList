@@ -14,16 +14,7 @@ function Details(){
      }, [id]);
      if(!character) return <div>Loading ....</div>
     return(
-        <>
-            <h1>{character.name}</h1>
-            
-            <p><b>Alternative names: </b></p>
-            <ul>
-                {character.alternate_names.length > 0 ? character.alternate_names.map(c => <li>{c}</li>)
-                : <li>No alternate names</li>
-                }
-            </ul>
-        </>
+    <span className="loading loading-spinner loading-xl"></span>
 
     )
 }
