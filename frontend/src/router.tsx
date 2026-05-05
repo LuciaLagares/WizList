@@ -4,6 +4,7 @@ import {
 } from "react-router-dom";
 import Detail from "./components/detailComponent"
 import App from "./App";
+import Registrer from "./components/registerComponent";
 
 const router = createBrowserRouter([
   {
@@ -14,6 +15,10 @@ const router = createBrowserRouter([
     path: "/detail/:id",
     element: <Detail />,
   },
+  {
+    path: "/register", 
+    element: <Registrer />
+  }
 ]);
 
 function AppRouter(){
