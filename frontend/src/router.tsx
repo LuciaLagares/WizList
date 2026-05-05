@@ -5,6 +5,7 @@ import {
 import Detail from "./components/detailComponent"
 import App from "./App";
 import Registrer from "./components/registerComponent";
+import Login from "./components/loginComponent";
 
 const router = createBrowserRouter([
   {
@@ -18,7 +19,11 @@ const router = createBrowserRouter([
   {
     path: "/register", 
     element: <Registrer />
-  }
+  },
+  {
+    path: "/login",
+    element: <Login />
+  },
 ]);
 
 function AppRouter(){

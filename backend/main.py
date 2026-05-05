@@ -46,6 +46,19 @@ def registrer():
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": "Error al registrar", "error": str(e)}), 500
+    
+@app.route("/login", methods=['POST'])
+def login():
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+
+    user = User.query.filter_by(username=username).first()
+
+    if not user or not check_password_hash(user.password, password):
+        return jsonify({"message": "Usuario o contraseña incorrectos"}), 401
+
+    return jsonify({"message": "Login exitoso"}), 200
 
 @app.route("/api/characters")
 def get_characters():

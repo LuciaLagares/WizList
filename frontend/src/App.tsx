@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import Title from "./components/titleComponent";
-import Card, { type CharacterProps } from "./components/cardComponent";
+import Card from "./components/cardComponent";
+import NavBar from "./components/navBarComponent";
 
 
 function App() {
@@ -14,6 +15,7 @@ const [characters, setCharacters] = useState([]);
   return (
 
     <div className="bg-blue-850">
+      <NavBar />
       <Title />
       <div className="grid grid-cols-3 gap-6 p-4">
           {characters.map((character: any) => (
