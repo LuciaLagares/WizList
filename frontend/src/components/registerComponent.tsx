@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function Registrer(){
     const [username, setUsername] = useState('');
@@ -21,6 +21,7 @@ function Registrer(){
       if(response.ok){
         const res = await response.json();
         alert(res.message);
+        navigate('/api/characters');
       }else if(response.status == 409){
         navigate('/login');
       }else{
@@ -64,11 +65,9 @@ function Registrer(){
             </div>
 
             <div className="card-actions justify-end mt-6">
-                <Link to={`/api/characters`}>
-                    <button type="submit" className="btn btn-primary w-full">
-                        Registrarse
-                    </button>
-                </Link>
+                <button type="submit" className="btn btn-primary w-full">
+                    Registrarse
+                </button>
             </div>
           </form>
         </div>
