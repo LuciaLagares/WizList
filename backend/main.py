@@ -1,13 +1,16 @@
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 import requests
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, session
 from flask_cors import CORS
 from app.models.user import User
+from app.models.list import List
+from app.models.rating import Rating
+from app.models.character_spell import character_spells
 from app.db import db
 
 app = Flask(__name__)
-CORS(app, origins=['http://localhost:5173'])
+CORS(app, origins=['http://localhost:5173'], supports_credentials=True)
 
 # Configuración de la base de datos
 app.config['SQLALCHEMY_DATABASE_URI'] = (
@@ -16,6 +19,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+
+
 # Inicializar db con la app
 db.init_app(app)
 
@@ -23,6 +28,10 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
  
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"message": "Bienvenido a Wizlist"}), 200
+
 @app.route("/register", methods=['POST'])
 def registrer():
     data = request.get_json()
@@ -42,6 +51,7 @@ def registrer():
     try:
         db.session.add(new_user)
         db.session.commit()
+        session["id_usuario"] = new_user.id
         return jsonify({"message": "Registro exitoso"})
     except Exception as e:
         db.session.rollback()
@@ -57,8 +67,26 @@ def login():
 
     if not user or not check_password_hash(user.password, password):
         return jsonify({"message": "Usuario o contraseña incorrectos"}), 401
-
+    session["id_usuario"] = user.id 
     return jsonify({"message": "Login exitoso"}), 200
+
+@app.route("/perfil", methods=["GET"])
+def get_profile():
+    id_usuario = session.get("id_usuario")
+
+    if not id_usuario:
+        return jsonify({"message": "No autenticado"}), 401
+    
+    user = User.query.get_or_404(id_usuario)
+    listas = List.query.filter_by(id_usuario = id_usuario).all()
+    valoraciones = Rating.query.filter_by(user_id=id_usuario).all()
+
+    return jsonify({
+        "usuario": user.to_dict(),
+        "listas":  [l.to_dict() for l in listas],
+        "valoraciones": [v.to_dict() for v in valoraciones]
+    }), 200
+
 
 @app.route("/api/characters")
 def get_characters():
