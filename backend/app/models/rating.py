@@ -11,3 +11,10 @@ class Rating(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     character_id = db.Column(db.String(100), db.ForeignKey('character.id'), nullable=True)
     spell_id = db.Column(db.String(100), db.ForeignKey('spell.id'), nullable=True)
+
+    def to_dict(self):
+            return {
+                "id": self.id,
+                "rate": self.rate,
+                "is_favorite": self.is_favorite
+            }

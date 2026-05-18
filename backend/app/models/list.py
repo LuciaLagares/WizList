@@ -12,3 +12,11 @@ class List(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
     items = db.relationship('ListItem', backref='parent_list')
+
+    def to_dict(self):
+            return {
+                "id": self.id,
+                "title": self.title,
+                "description": self.description,
+                "is_public": self.is_public 
+            }

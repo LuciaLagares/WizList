@@ -12,3 +12,10 @@ class User(db.Model):
     
     lists = db.relationship('List', backref='owner', lazy=True)
     ratings = db.relationship('Rating', backref='user', lazy=True)
+
+    def to_dict(self):
+            return {
+                "id": self.id,
+                "username": self.username,
+                "role": self.role,
+            }

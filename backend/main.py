@@ -2,23 +2,36 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 import requests
 from flask import Flask, jsonify, request, session
+from flask_session import Session
 from flask_cors import CORS
 from app.models.user import User
 from app.models.list import List
 from app.models.rating import Rating
 from app.models.character_spell import character_spells
 from app.db import db
+import random
+
+from app.models.character import Character
+from app.models.list_item import ListItem
+from app.models.spell import Spell
 
 app = Flask(__name__)
+
+app.config['SECRET_KEY'] = 'abc'
+app.config['SESSION_TYPE'] = 'filesystem' 
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_PERMANENT'] = False
+
+Session(app)
+
 CORS(app, origins=['http://localhost:5173'], supports_credentials=True)
 
-# Configuración de la base de datos
 app.config['SQLALCHEMY_DATABASE_URI'] = (
     f"mysql+pymysql://{os.environ.get('DB_USER')}:{os.environ.get('DB_PASSWORD')}"
     f"@{os.environ.get('DB_HOST')}:{os.environ.get('DB_PORT')}/{os.environ.get('DB_NAME')}"
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 
 
 # Inicializar db con la app
@@ -31,6 +44,11 @@ with app.app_context():
 @app.route("/", methods=["GET"])
 def home():
     return jsonify({"message": "Bienvenido a Wizlist"}), 200
+
+@app.route("/logout", methods=['POST'])
+def logout():
+    session.clear()  
+    return jsonify({"message": "Sesión cerrada correctamente"}), 200
 
 @app.route("/register", methods=['POST'])
 def registrer():
@@ -78,7 +96,7 @@ def get_profile():
         return jsonify({"message": "No autenticado"}), 401
     
     user = User.query.get_or_404(id_usuario)
-    listas = List.query.filter_by(id_usuario = id_usuario).all()
+    listas = List.query.filter_by(user_id = id_usuario).all()
     valoraciones = Rating.query.filter_by(user_id=id_usuario).all()
 
     return jsonify({
@@ -88,20 +106,132 @@ def get_profile():
     }), 200
 
 
+
 @app.route("/api/characters")
 def get_characters():
     response = requests.get('https://hp-api.onrender.com/api/characters')
-    return jsonify(response.json())
+    response.raise_for_status()
+    return response.json()
 
 @app.route("/api/spells")
 def get_spells():
     response = requests.get('https://hp-api.onrender.com/api/spells')
-    return jsonify(response.json())
+    response.raise_for_status()
+    return response.json()
 
-@app.route("/detail/<string:id>/")
-def get_details(id):
-    response = requests.get('https://hp-api.onrender.com/api/character/'+id)
-    return jsonify(response.json())
+@app.route("/show-characters", methods=["GET"])
+def characters_spells():
+    characters = get_characters()
+    spells = get_spells()
+    result = []
 
+    for character in characters:
+        result.append({
+            "id": character.get("id"),
+            "name": character.get("name"),
+            "house": character.get("house"),
+            "image": character.get("image"),
+            "spells": random.sample(spells, min(5, len(spells)))
+        })
+    return jsonify(result)
+
+@app.route("/character/<character_id>/spells", methods=["GET"])
+def character_spells(character_id):
+    characters = get_characters()
+    spells = get_spells()
+
+    character = next(
+        (c for c in characters if c.get("id") == character_id),
+        None
+    )
+
+    if not character:
+        return jsonify({"error": f"Personaje '{character_id}' no encontrado"}), 404
+
+    return jsonify({
+        "name": character.get("name"),
+        "house": character.get("house"),
+        "image": character.get("image"),
+        "spells": random.sample(spells, min(3, len(spells)))
+    })
+
+@app.route("/list/<int:list_id>/add-character", methods=["POST"])
+def add_to_list(list_id):
+    id_usuario = session.get("id_usuario")
+    if not id_usuario:
+        return jsonify({"error": "No autenticado"}), 401
+
+    lista = List.query.filter_by(id=list_id, user_id=id_usuario).first()
+    if not lista:
+        return jsonify({"error": "Lista no encontrada"}), 404
+
+    data = request.get_json()
+
+    character = Character.query.get(data["character_id"])
+    if not character:
+        character = Character(
+            id=data["character_id"],
+            name=data["character_name"],
+            house=data.get("character_house"),
+            image=data.get("character_image")
+        )
+        db.session.add(character)
+
+    for spell_data in data.get("spells", []):
+        spell = Spell.query.get(spell_data["id"])
+        if not spell:
+            spell = Spell(
+                id=spell_data["id"],
+                name=spell_data["name"],
+                description=spell_data.get("description")
+            )
+            db.session.add(spell)
+        if spell not in character.spells:
+            character.spells.append(spell)
+
+    ya_existe = ListItem.query.filter_by(
+        list_id=list_id,
+        character_id=data["character_id"]
+    ).first()
+    if ya_existe:
+        return jsonify({"error": "El personaje ya está en la lista"}), 409
+
+    item = ListItem(
+        list_id=list_id,
+        character_id=data["character_id"]
+    )
+    db.session.add(item)
+    db.session.commit()
+
+    return jsonify({"message": "Personaje añadido"}), 201
+
+@app.route('/my-lists', methods=["GET"])
+def get_lists():
+    print("SESSION:", dict(session))
+    id_usuario = session.get("id_usuario")
+    if not id_usuario:
+        return jsonify({"error": "No autenticado"}), 401
+    listas = List.query.filter_by(user_id=id_usuario).all()
+    resultado = []
+    for l in listas:
+        resultado.append(l.to_dict())
+    return jsonify(resultado), 200
+
+@app.route("/list", methods=["POST"])
+def create_list():
+    id_usuario = session.get("id_usuario")
+    if not id_usuario:
+        return jsonify({"error": "No autenticado"}), 401
+
+    data = request.get_json()
+    nueva_lista = List(
+        title=data.get("title"),
+        description=data.get("description", ""),
+        is_public=data.get("is_public", True),
+        user_id=id_usuario
+    )
+    db.session.add(nueva_lista)
+    db.session.commit()
+    return jsonify(nueva_lista.to_dict()), 201
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

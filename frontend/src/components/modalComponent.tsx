@@ -1,21 +1,25 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 
+export interface SpellProps {
+  id: string;
+  name: string;
+  description: string;
+}
+
 export interface CharacterProps {
   id: string;
   name: string;
   house: string;
   image: string;
   alternate_names: string[];
-  spells: { name: string; description: string }[];
+  spells: SpellProps[];
 }
 
 function Card({ id, name, house, image, spells }: CharacterProps) {
   const [showModal, setShowModal] = useState(false);
   const [lists, setLists] = useState<{ id: number; title: string }[]>([]);
   const [mensaje, setMensaje] = useState("");
-  const [creando, setCreando] = useState(false);
-  const [nuevoTitulo, setNuevoTitulo] = useState("");
 
   const openModal = async () => {
     const res = await fetch("http://localhost:5000/my-lists", {
@@ -39,26 +43,13 @@ function Card({ id, name, house, image, spells }: CharacterProps) {
         spells: spells,
       }),
     });
+
     const data = await res.json();
     setMensaje(data.message || data.error);
     setTimeout(() => {
       setShowModal(false);
       setMensaje("");
     }, 1500);
-  };
-
-  const createList = async () => {
-    if (!nuevoTitulo.trim()) return;
-    const res = await fetch("http://localhost:5000/list", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: nuevoTitulo }),
-    });
-    const nueva = await res.json();
-    setLists([...lists, nueva]);
-    setCreando(false);
-    setNuevoTitulo("");
   };
 
   return (
@@ -84,6 +75,7 @@ function Card({ id, name, house, image, spells }: CharacterProps) {
         </div>
       </div>
 
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-80">
@@ -91,54 +83,25 @@ function Card({ id, name, house, image, spells }: CharacterProps) {
 
             {mensaje ? (
               <p className="text-center text-green-600 font-semibold">{mensaje}</p>
-            ) : creando ? (
-              <div className="flex flex-col gap-2">
-                <input
-                  type="text"
-                  placeholder="Nombre de la lista"
-                  value={nuevoTitulo}
-                  onChange={e => setNuevoTitulo(e.target.value)}
-                  className="border rounded px-3 py-2 w-full"
-                />
-                <button onClick={createList} className="btn btn-primary w-full">
-                  Crear
-                </button>
-                <button onClick={() => setCreando(false)} className="text-sm text-gray-400">
-                  Cancelar
-                </button>
-              </div>
             ) : lists.length === 0 ? (
-              <div className="flex flex-col items-center gap-3">
-                <p className="text-gray-500">No tienes listas creadas.</p>
-                <button onClick={() => setCreando(true)} className="btn btn-primary w-full">
-                  Crear lista
-                </button>
-              </div>
+              <p className="text-gray-500">No tienes listas creadas.</p>
             ) : (
-              <>
-                <ul className="flex flex-col gap-2">
-                  {lists.map(list => (
-                    <li key={list.id}>
-                      <button
-                        onClick={() => addToList(list.id)}
-                        className="w-full text-left px-4 py-2 rounded hover:bg-indigo-100 border border-gray-200"
-                      >
-                        {list.title}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-                <button
-                  onClick={() => setCreando(true)}
-                  className="mt-3 text-sm text-indigo-500 hover:underline w-full text-center"
-                >
-                  + Crear nueva lista
-                </button>
-              </>
+              <ul className="flex flex-col gap-2">
+                {lists.map((list) => (
+                  <li key={list.id}>
+                    <button
+                      onClick={() => addToList(list.id)}
+                      className="w-full text-left px-4 py-2 rounded hover:bg-indigo-100 border border-gray-200"
+                    >
+                      {list.title}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             )}
 
             <button
-              onClick={() => { setShowModal(false); setCreando(false); setMensaje(""); }}
+              onClick={() => setShowModal(false)}
               className="mt-4 text-sm text-gray-400 hover:text-gray-600 w-full text-center"
             >
               Cancelar
