@@ -135,7 +135,7 @@ def characters_spells():
         })
     return jsonify(result)
 
-@app.route("/character/<character_id>/spells", methods=["GET"])
+@app.route("/character/<string:character_id>/spells", methods=["GET"])
 def character_spells(character_id):
     characters = get_characters()
     spells = get_spells()
@@ -207,7 +207,6 @@ def add_to_list(list_id):
 
 @app.route('/my-lists', methods=["GET"])
 def get_lists():
-    print("SESSION:", dict(session))
     id_usuario = session.get("id_usuario")
     if not id_usuario:
         return jsonify({"error": "No autenticado"}), 401
@@ -233,5 +232,39 @@ def create_list():
     db.session.add(nueva_lista)
     db.session.commit()
     return jsonify(nueva_lista.to_dict()), 201
+
+@app.route("/list/<int:list_id>", methods=["GET"])
+def show_list(list_id):
+    id_usuario = session.get("id_usuario")
+    lista = List.query.get_or_404(list_id)
+    items = []
+
+    for i in lista.items:
+        if i.character_id:
+            character = Character.query.get(i.character_id)
+            spell_list = []
+            for spell in character.spells:
+                spell_list.append({
+                    "name": spell.name,
+                    "description": spell.description
+                })
+            items.append({
+                "tipo": "character",
+                "id": character.id,
+                "name": character.name,
+                "house": character.house,
+                "image": character.image,
+                "spells": spell_list
+            })
+    return jsonify({
+        "id": lista.id,
+        "title": lista.title,
+        "description": lista.description,
+        "is_public": lista.is_public,
+        "items": items
+    }), 200
+
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

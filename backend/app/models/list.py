@@ -18,5 +18,5 @@ class List(db.Model):
                 "id": self.id,
                 "title": self.title,
                 "description": self.description,
-                "is_public": self.is_public 
+                "is_public": self.is_public,
             }

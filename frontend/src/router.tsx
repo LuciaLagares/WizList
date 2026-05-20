@@ -8,6 +8,7 @@ import Registrer from "./components/registerComponent";
 import Login from "./components/loginComponent";
 import Perfil from "./components/perfilComponent";
 import Home from "./components/homeComponent";
+import DetailList from "./components/personalListComponent";
 
 const router = createBrowserRouter([
   {
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
     path: '/perfil',
     element: <Perfil />
   },
+  {
+    path: '/list/:id',
+    element: <DetailList />
+  }
 ]);
 
 function AppRouter(){

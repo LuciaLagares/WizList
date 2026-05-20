@@ -21,7 +21,7 @@ function Registrer(){
       if(response.ok){
         const res = await response.json();
         alert(res.message);
-        navigate('/api/characters');
+        navigate('/show-characters');
       }else if(response.status == 409){
         navigate('/login');
       }else{

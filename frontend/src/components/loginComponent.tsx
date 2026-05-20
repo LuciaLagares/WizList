@@ -64,7 +64,7 @@ function Login() {
 
                         <div className="card-actions justify-end mt-6">
                             <button type="submit" className="btn btn-primary w-full">
-                                <Link to={'/api/characters'}>
+                                <Link to={'/show-characters'}>
                                 Iniciar sesión
                                 </Link>
                             </button>

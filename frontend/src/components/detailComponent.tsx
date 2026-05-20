@@ -1,19 +1,76 @@
-import {  useParams } from "react-router-dom";
+
 import { useEffect, useState } from "react";
 import type { CharacterProps } from "./cardComponent";
 import NavBar from "./navBarComponent";
+import { useNavigate, useParams } from "react-router-dom";
 
 
 
 function Details(){
     const {id} = useParams();
-    const [character, setCharacter] = useState<CharacterProps | null>(null);
-     useEffect(() =>{
+    const navigate = useNavigate();
+
+    useEffect(() =>{
         fetch(`http://localhost:5000/character/${id}/spells`)
         .then(res => res.json())
         .then(data => setCharacter(data));
-     }, [id]);
-     if(!character) return <div>Loading ....</div>
+    }, [id]);
+    
+    const [character, setCharacter] = useState<CharacterProps | null>(null)
+    const [showModal, setShowModal] = useState(false);
+    const [lists, setLists] = useState<{ id: number; title: string }[]>([]);
+    const [mensaje, setMensaje] = useState("");
+    const [creando, setCreando] = useState(false);
+    const [nuevoTitulo, setNuevoTitulo] = useState("");
+    
+    if(!character) return <div>Loading ....</div>
+
+    const openModal = async () => {
+        const res = await fetch("http://localhost:5000/my-lists", {
+        credentials: "include",
+        });
+        if(res.status === 401) navigate("/login")
+        const data = await res.json();
+        setLists(Array.isArray(data) ? data : []);
+        setShowModal(true);
+    };
+
+    const addToList = async (listId: number) => {
+        const res = await fetch(`http://localhost:5000/list/${listId}/add-character`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            character_id: id,
+            character_name: character.name,
+            character_house: character.house,
+            character_image: character.image,
+            spells: character.spells,
+      }),
+    });
+    const data = await res.json();
+    setMensaje(data.message || data.error);
+    setTimeout(() => {
+      setShowModal(false);
+      setMensaje("");
+    }, 1500);
+  };
+
+  const createList = async () => {
+    if (!nuevoTitulo.trim()) return;
+    const res = await fetch("http://localhost:5000/list", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: nuevoTitulo }),
+    });
+    const nueva = await res.json();
+    setLists([...lists, nueva]);
+    setCreando(false);
+    setNuevoTitulo("");
+  };
+
+
     return(
         <div className="flex flex-col min-h-screen mx-6">
             <NavBar />
@@ -51,9 +108,78 @@ function Details(){
                         </div>
                     </div>
                 </div>
-            
-            
+                 <div className="card-actions justify-end">
+                    <button onClick={openModal} className="btn btn-primary p-5">
+                    Add
+                    </button>
+                </div>
+                {showModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-80">
+                <h3 className="text-lg font-bold mb-4">Añadir a una lista</h3>
+
+                {mensaje ? (
+                <p className="text-center text-green-600 font-semibold">{mensaje}</p>
+                ) : creando ? (
+                <div className="flex flex-col gap-2">
+                    <input
+                    type="text"
+                    placeholder="Nombre de la lista"
+                    value={nuevoTitulo}
+                    onChange={e => setNuevoTitulo(e.target.value)}
+                    className="border rounded px-3 py-2 w-full"
+                    />
+                    <button onClick={createList} className="btn btn-primary w-full">
+                    Crear
+                    </button>
+                    <button onClick={() => setCreando(false)} className="text-sm text-gray-400">
+                    Cancelar
+                    </button>
+                </div>
+                ) : lists.length === 0 ? (
+                <div className="flex flex-col items-center gap-3">
+                    <p className="text-gray-500">No tienes listas creadas.</p>
+                    <button onClick={() => setCreando(true)} className="btn btn-primary w-full">
+                    Crear lista
+                    </button>
+                </div>
+                ) : (
+                <>
+                    <ul className="flex flex-col gap-2">
+                    {lists.map(list => (
+                        <li key={list.id}>
+                        <button
+                            onClick={() => addToList(list.id)}
+                            className="w-full text-left px-4 py-2 rounded hover:bg-indigo-100 border border-gray-200"
+                        >
+                            {list.title}
+                        </button>
+                        </li>
+                    ))}
+                    </ul>
+                    <button
+                    onClick={() => setCreando(true)}
+                    className="mt-3 text-sm text-indigo-500 hover:underline w-full text-center"
+                    >
+                    + Crear nueva lista
+                    </button>
+                </>
+                )}
+
+                <button
+                onClick={() => { setShowModal(false); setCreando(false); setMensaje(""); }}
+                className="mt-4 text-sm text-gray-400 hover:text-gray-600 w-full text-center"
+                >
+                Cancelar
+                </button>
             </div>
+            </div>
+                )}
+        
+            </div>
+                
+            
+        
             
         </div>
     )

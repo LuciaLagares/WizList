@@ -17,9 +17,10 @@ interface Personaje {
   imagen_url: string | null
 }
 interface Lista {
-  id:          number
-  nombre:      string
-  visibilidad: "publica" | "privada"
+  id: number
+  title: string
+  description: string
+  is_public: boolean
 }
 
 interface Valoracion {
@@ -28,7 +29,7 @@ interface Valoracion {
 }
 interface PerfilData {
   usuario: user
-  listas:       Lista[]
+  listas: Lista[]
   valoraciones: Valoracion[]
 }
 function Perfil(){
@@ -47,7 +48,7 @@ function Perfil(){
       .then((res) => {
         if (res.status === 401) {
           navigate("/login");
-          return null;
+          return;
         }
         if (!res.ok) throw new Error("Error en el servidor");
         return res.json();
@@ -67,25 +68,30 @@ function Perfil(){
     );
   }
   if(!data) return <div>Error al cargar el perfil</div>
-
+  const iniciales = data.usuario.username.slice(0, 2).toUpperCase()
     return (
       <main className="perfil">
       <NavBar />
 
-      <section className="perfil__header">
-        <div>
+      <section className="perfil__header p-6">
+        <div className="flex items-center gap-4 mb-7">
+          <div className="avatar avatar-placeholder">
+            <div className="bg-red-200 text-black w-16 flex items-center justify-center rounded-full">
+              <span className="text-lg">{iniciales}</span>
+            </div>
+          </div>
           <h1 className="font-bold text-4xl text-black">{data.usuario.username}</h1>
         </div>
       </section>
 
       <section className="perfil__listas">
-        <h2>Mis listas</h2>
+        <h2 className="font-bold">Mis listas</h2>
         {data.listas.length === 0
           ? <p>No tienes listas todavía.</p>
           : data.listas.map(lista => (
-              <div key={lista.id} className="lista-card">
-                <span>{lista.nombre}</span>
-                <span className={`badge badge--${lista.visibilidad}`}>{lista.visibilidad}</span>
+              <div key={lista.id} onClick={() => navigate(`/list/${lista.id}`)} className="lista-card">
+                <span>{lista.title}</span>
+                <span className={`badge ${lista.is_public ? "badge-success" : "badge-error"}`}>{lista.is_public ? "pública" : "privada"}</span>              
               </div>
             ))
         }
