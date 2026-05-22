@@ -105,8 +105,6 @@ def get_profile():
         "valoraciones": [v.to_dict() for v in valoraciones]
     }), 200
 
-
-
 @app.route("/api/characters")
 def get_characters():
     response = requests.get('https://hp-api.onrender.com/api/characters')
@@ -270,6 +268,19 @@ def show_list(list_id):
         "items": items
     }), 200
 
+@app.route("/public-lists", methods=["GET"])
+def get_public_lists():
+    listas = List.query.filter_by(is_public=True).all()
+    resultado = []
+    for item in listas:
+        user = User.query.get(item.user_id)
+        d = item.to_dict()
+        if user:
+            d["username"] = user.username
+        else:
+            d["username"] = 'Desconocido'
+        resultado.append(d)
+    return jsonify(resultado), 200
 
 
 if __name__ == "__main__":

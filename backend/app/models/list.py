@@ -19,4 +19,5 @@ class List(db.Model):
                 "title": self.title,
                 "description": self.description,
                 "is_public": self.is_public,
+                "user_id": self.user_id
             }
