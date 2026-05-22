@@ -19,8 +19,8 @@ function Registrer(){
         body: JSON.stringify(datosParaEnviar) 
       });
       if(response.ok){
-        const res = await response.json();
-        alert(res.message);
+        const { access_token } = await response.json();
+        localStorage.setItem("token", access_token)
         navigate('/show-characters');
       }else if(response.status == 409){
         navigate('/login');

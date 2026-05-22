@@ -1,8 +1,9 @@
+from datetime import timedelta
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 import requests
 from flask import Flask, jsonify, request, session
-from flask_session import Session
+from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
 from flask_cors import CORS
 from app.models.user import User
 from app.models.list import List
@@ -17,13 +18,12 @@ from app.models.spell import Spell
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = 'abc'
-app.config['SESSION_TYPE'] = 'filesystem' 
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_SECURE'] = False
-app.config['SESSION_PERMANENT'] = False
+app.config['JWT_SECRET_KEY'] = 'a3f8c2e1d4b7a9f0e3c6d8b1a4f7c2e5d9b3a6f1c4e7d0b8a2f5c9e2d6b4a7f0'
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=10)
 
-Session(app)
+jwt = JWTManager(app)
+
+
 
 CORS(app, origins=['http://localhost:5173'], supports_credentials=True)
 
@@ -47,7 +47,6 @@ def home():
 
 @app.route("/logout", methods=['POST'])
 def logout():
-    session.clear()  
     return jsonify({"message": "Sesión cerrada correctamente"}), 200
 
 @app.route("/register", methods=['POST'])
@@ -69,8 +68,8 @@ def registrer():
     try:
         db.session.add(new_user)
         db.session.commit()
-        session["id_usuario"] = new_user.id
-        return jsonify({"message": "Registro exitoso"})
+        access_token = create_access_token(identity=str(new_user.id))
+        return jsonify({"message": "Registro exitoso", "access_token": access_token}), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": "Error al registrar", "error": str(e)}), 500
@@ -85,12 +84,13 @@ def login():
 
     if not user or not check_password_hash(user.password, password):
         return jsonify({"message": "Usuario o contraseña incorrectos"}), 401
-    session["id_usuario"] = user.id 
-    return jsonify({"message": "Login exitoso"}), 200
+    access_token = create_access_token(identity=str(user.id))
+    return jsonify({"message": "Login exitoso", "access_token": access_token}), 200
 
 @app.route("/perfil", methods=["GET"])
+@jwt_required()
 def get_profile():
-    id_usuario = session.get("id_usuario")
+    id_usuario = int(get_jwt_identity())
 
     if not id_usuario:
         return jsonify({"message": "No autenticado"}), 401
@@ -156,8 +156,9 @@ def character_spells(character_id):
     })
 
 @app.route("/list/<int:list_id>/add-character", methods=["POST"])
+@jwt_required()
 def add_to_list(list_id):
-    id_usuario = session.get("id_usuario")
+    id_usuario = get_jwt_identity()
     if not id_usuario:
         return jsonify({"error": "No autenticado"}), 401
 
@@ -206,8 +207,9 @@ def add_to_list(list_id):
     return jsonify({"message": "Personaje añadido"}), 201
 
 @app.route('/my-lists', methods=["GET"])
+@jwt_required()
 def get_lists():
-    id_usuario = session.get("id_usuario")
+    id_usuario = get_jwt_identity()
     if not id_usuario:
         return jsonify({"error": "No autenticado"}), 401
     listas = List.query.filter_by(user_id=id_usuario).all()
@@ -217,8 +219,9 @@ def get_lists():
     return jsonify(resultado), 200
 
 @app.route("/list", methods=["POST"])
+@jwt_required()
 def create_list():
-    id_usuario = session.get("id_usuario")
+    id_usuario = get_jwt_identity()
     if not id_usuario:
         return jsonify({"error": "No autenticado"}), 401
 
@@ -234,8 +237,9 @@ def create_list():
     return jsonify(nueva_lista.to_dict()), 201
 
 @app.route("/list/<int:list_id>", methods=["GET"])
+@jwt_required()
 def show_list(list_id):
-    id_usuario = session.get("id_usuario")
+    id_usuario = get_jwt_identity()
     lista = List.query.get_or_404(list_id)
     items = []
 

@@ -42,11 +42,12 @@ function Perfil(){
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
       },
-      credentials: "include",
     })
       .then((res) => {
-        if (res.status === 401) {
+        if (res.status === 401 || res.status===422) {
+          localStorage.removeItem("token");
           navigate("/login");
           return;
         }
