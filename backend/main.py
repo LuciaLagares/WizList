@@ -2,7 +2,7 @@ from datetime import timedelta
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 import requests
-from flask import Flask, jsonify, request, session
+from flask import Flask, jsonify, request
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
 from flask_cors import CORS
 from app.models.user import User
@@ -25,7 +25,7 @@ jwt = JWTManager(app)
 
 
 
-CORS(app, origins=['http://localhost:5173'], supports_credentials=True)
+CORS(app, origins=['http://localhost:5173'], supports_=True)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = (
     f"mysql+pymysql://{os.environ.get('DB_USER')}:{os.environ.get('DB_PASSWORD')}"
@@ -158,7 +158,7 @@ def character_spells(character_id):
 @app.route("/list/<int:list_id>/add-character", methods=["POST"])
 @jwt_required()
 def add_to_list(list_id):
-    id_usuario = get_jwt_identity()
+    id_usuario = int(get_jwt_identity())
     if not id_usuario:
         return jsonify({"error": "No autenticado"}), 401
 
@@ -209,7 +209,7 @@ def add_to_list(list_id):
 @app.route('/my-lists', methods=["GET"])
 @jwt_required()
 def get_lists():
-    id_usuario = get_jwt_identity()
+    id_usuario = int(get_jwt_identity())
     if not id_usuario:
         return jsonify({"error": "No autenticado"}), 401
     listas = List.query.filter_by(user_id=id_usuario).all()
@@ -221,7 +221,7 @@ def get_lists():
 @app.route("/list", methods=["POST"])
 @jwt_required()
 def create_list():
-    id_usuario = get_jwt_identity()
+    id_usuario = int(get_jwt_identity())
     if not id_usuario:
         return jsonify({"error": "No autenticado"}), 401
 
@@ -239,7 +239,9 @@ def create_list():
 @app.route("/list/<int:list_id>", methods=["GET"])
 @jwt_required()
 def show_list(list_id):
-    id_usuario = get_jwt_identity()
+    id_usuario = int(get_jwt_identity())
+    if not id_usuario:
+        return jsonify({"error": "No autenticado"}), 401
     lista = List.query.get_or_404(list_id)
     items = []
 

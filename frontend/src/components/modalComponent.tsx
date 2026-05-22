@@ -23,7 +23,9 @@ function Card({ id, name, house, image, spells }: CharacterProps) {
 
   const openModal = async () => {
     const res = await fetch("http://localhost:5000/my-lists", {
-      credentials: "include",
+     headers:{
+      "Authorization": `Bearer ${localStorage.getItem("token")}`
+     }
     });
     const data = await res.json();
     setLists(data);
@@ -33,8 +35,7 @@ function Card({ id, name, house, image, spells }: CharacterProps) {
   const addToList = async (listId: number) => {
     const res = await fetch(`http://localhost:5000/list/${listId}/add-character`, {
       method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("token")}` },
       body: JSON.stringify({
         character_id: id,
         character_name: name,
