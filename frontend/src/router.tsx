@@ -10,6 +10,7 @@ import Perfil from "./components/perfilComponent";
 import Home from "./components/homeComponent";
 import DetailList from "./components/personalListComponent";
 import PublicLists from "./components/publicListComponent";
+import PersonProfile from "./components/personProfileComponent";
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
   {
     path: '/public-lists',
     element:<PublicLists />
+  },
+  {
+    path: '/:id/perfil',
+    element: <PersonProfile />
   }
 ]);
 

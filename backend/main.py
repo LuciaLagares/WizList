@@ -282,6 +282,18 @@ def get_public_lists():
         resultado.append(d)
     return jsonify(resultado), 200
 
+@app.route("/<int:user_id>/perfil", methods=["GET"])
+def show_profile(user_id):
+    user = User.query.get_or_404(user_id)
+    listas = List.query.filter_by(user_id=user_id, is_public=True).all()
+    resul = []
+    for l in listas:
+        resul.append(l.to_dict())
+    return jsonify({
+        "usuario": user.to_dict(),
+        "listas": resul
+    }),200
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

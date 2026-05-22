@@ -42,10 +42,9 @@ export default function PublicLists() {
           {listas.map(lista => (
             <div
               key={lista.id}
-              onClick={() => navigate(`/list/${lista.id}`)}
-              className="border rounded-xl p-5 cursor-pointer hover:shadow-md transition bg-white"
+              className="border rounded-xl p-5 bg-white"
             >
-              <div className="flex items-center gap-3 mb-3">
+              <div className="flex items-center gap-3 mb-3 cursor-pointer" onClick={() => navigate(`/${lista.user_id}/perfil`)}>
                 <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">
                   {lista.username.slice(0, 2).toUpperCase()}
                 </div>
@@ -58,7 +57,7 @@ export default function PublicLists() {
               {lista.description && (
                 <p className="text-gray-500 text-sm mt-1">{lista.description}</p>
               )}
-              <div className="mt-3 text-xs text-indigo-500 font-medium">
+              <div className="mt-3 text-xs text-indigo-500 font-medium cursor-pointer" onClick={() => navigate(`/list/${lista.id}`)}>
                 Ver lista
               </div>
             </div>
