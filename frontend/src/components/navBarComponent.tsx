@@ -10,9 +10,9 @@ function NavBar() {
             const response = await fetch('http://localhost:5000/logout', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
                 },
-                credentials: 'include' 
             });
 
             if (response.ok) {

@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+
+    const navigate = useNavigate()
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
@@ -13,12 +15,12 @@ function Login() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
-                credentials: "include"
             });
 
             if (response.ok) {
-                const res = await response.json();
-                alert(res.message);
+                const { access_token } = await response.json();
+                localStorage.setItem("token", access_token)
+                navigate("/show-characters")
             } else if (response.status === 401) {
                 alert('Usuario o contraseña incorrectos');
             } else {
@@ -64,9 +66,7 @@ function Login() {
 
                         <div className="card-actions justify-end mt-6">
                             <button type="submit" className="btn btn-primary w-full">
-                                <Link to={'/show-characters'}>
                                 Iniciar sesión
-                                </Link>
                             </button>
                         </div>
 

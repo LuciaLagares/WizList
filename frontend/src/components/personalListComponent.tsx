@@ -32,7 +32,11 @@ export default function DetailList(){
     
     useEffect(() =>{
         fetch(`http://localhost:5000/list/${id}`, {
-            credentials: "include",
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${localStorage.getItem("token")}`
+            },
         })
         .then((res) => {
             if(!res.ok) throw new Error("Error al cargar la lista");

@@ -27,7 +27,9 @@ function Details(){
 
     const openModal = async () => {
         const res = await fetch("http://localhost:5000/my-lists", {
-        credentials: "include",
+        headers:{
+            "Authorization": `Bearer ${localStorage.getItem("token")}`
+        }
         });
         if(res.status === 401) navigate("/login")
         const data = await res.json();
@@ -38,8 +40,7 @@ function Details(){
     const addToList = async (listId: number) => {
         const res = await fetch(`http://localhost:5000/list/${listId}/add-character`, {
         method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" , "Authorization": `Bearer ${localStorage.getItem("token")}`},
         body: JSON.stringify({
             character_id: id,
             character_name: character.name,
@@ -60,8 +61,8 @@ function Details(){
     if (!nuevoTitulo.trim()) return;
     const res = await fetch("http://localhost:5000/list", {
       method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
+
+      headers: { "Content-Type": "application/json" , "Authorization": `Bearer ${localStorage.getItem("token")}`},
       body: JSON.stringify({ title: nuevoTitulo }),
     });
     const nueva = await res.json();
