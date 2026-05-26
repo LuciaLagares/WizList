@@ -12,3 +12,11 @@ class Character(db.Model):
     image = db.Column(db.String(260))
 
     spells = db.relationship('Spell', secondary=character_spells, backref='wizards')
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "house": self.house,
+            "image": self.image
+        }

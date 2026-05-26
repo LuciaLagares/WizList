@@ -10,6 +10,7 @@ from app.models.list import List
 from app.models.rating import Rating
 from app.models.character_spell import character_spells
 from app.db import db
+from flask_migrate import Migrate
 import random
 
 from app.models.character import Character
@@ -17,6 +18,7 @@ from app.models.list_item import ListItem
 from app.models.spell import Spell
 
 app = Flask(__name__)
+migrate = Migrate(app, db)
 
 app.config['JWT_SECRET_KEY'] = 'a3f8c2e1d4b7a9f0e3c6d8b1a4f7c2e5d9b3a6f1c4e7d0b8a2f5c9e2d6b4a7f0'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=10)
@@ -25,7 +27,7 @@ jwt = JWTManager(app)
 
 
 
-CORS(app, origins=['http://localhost:5173'], supports_=True)
+CORS(app, origins=['http://localhost:5173'], supports_credentials=True)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = (
     f"mysql+pymysql://{os.environ.get('DB_USER')}:{os.environ.get('DB_PASSWORD')}"
@@ -98,11 +100,18 @@ def get_profile():
     user = User.query.get_or_404(id_usuario)
     listas = List.query.filter_by(user_id = id_usuario).all()
     valoraciones = Rating.query.filter_by(user_id=id_usuario).all()
+    listas_resultado = []
+    valoraciones_resultado = []
 
+    for l in listas:
+        listas_resultado.append(l.to_dict())
+
+    for v in valoraciones:
+        valoraciones_resultado.append(v.to_dict())
     return jsonify({
         "usuario": user.to_dict(),
-        "listas":  [l.to_dict() for l in listas],
-        "valoraciones": [v.to_dict() for v in valoraciones]
+        "listas":  listas_resultado,
+        "valoraciones": valoraciones_resultado
     }), 200
 
 @app.route("/api/characters")
@@ -241,6 +250,7 @@ def show_list(list_id):
     if not id_usuario:
         return jsonify({"error": "No autenticado"}), 401
     lista = List.query.get_or_404(list_id)
+    user = User.query.get(lista.user_id) 
     items = []
 
     for i in lista.items:
@@ -265,14 +275,19 @@ def show_list(list_id):
         "title": lista.title,
         "description": lista.description,
         "is_public": lista.is_public,
+        "user_id": lista.user_id,               
+        "username": user.username if user else "Desconocido",
         "items": items
     }), 200
 
 @app.route("/public-lists", methods=["GET"])
 def get_public_lists():
-    listas = List.query.filter_by(is_public=True).all()
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 4, type=int)
+
+    paginacion = List.query.filter_by(is_public=True).paginate(page=page, per_page=per_page)
     resultado = []
-    for item in listas:
+    for item in paginacion:
         user = User.query.get(item.user_id)
         d = item.to_dict()
         if user:
@@ -280,7 +295,11 @@ def get_public_lists():
         else:
             d["username"] = 'Desconocido'
         resultado.append(d)
-    return jsonify(resultado), 200
+    return jsonify({
+        "listas": resultado,
+        "total": paginacion.total,
+        "pages": paginacion.pages
+    }), 200
 
 @app.route("/<int:user_id>/perfil", methods=["GET"])
 def show_profile(user_id):
@@ -294,6 +313,79 @@ def show_profile(user_id):
         "listas": resul
     }),200
 
+@app.route("/rating", methods=["POST"])
+@jwt_required()
+def crear_rating():
+    user_id = get_jwt_identity()
+    data = request.json
+
+    character_id = data.get("character_id")
+    rate = data.get("rate")
+    is_favourite = data.get("is_favourite")
+
+    if character_id:
+        character = Character.query.get(character_id)
+        if not character:
+            character = Character(
+                id=character_id,
+                name=data.get("character_name"),
+                house=data.get("character_house"),
+                image=data.get("character_image"),
+            )
+            db.session.add(character)
+
+    rating = Rating.query.filter_by(
+        user_id=user_id, character_id=character_id
+    ).first()
+
+    if rating:
+        if rate is not None:
+            rating.rate = rate
+        if is_favourite is not None:
+            rating.is_favourite = is_favourite
+    
+    else:
+        rating = Rating(user_id=user_id, character_id=character_id,  rate=rate, is_favorite=is_favourite or False)
+        db.session.add(rating)
+    db.session.commit()
+    return jsonify(rating.to_dict()), 200
+
+@app.route("/rating/character/<character_id>", methods=["GET"])
+@jwt_required()
+def get_rating_character(character_id):
+    user_id = get_jwt_identity()
+    rating = Rating.query.filter_by(user_id=user_id, character_id=character_id).first()
+    if not rating:
+        return jsonify(None), 200
+    return jsonify(rating.to_dict()), 200
+
+@app.route("/valoraciones/<int:rating_id>", methods=["PUT"])
+@jwt_required()
+def update_rating(rating_id):
+    user_id = get_jwt_identity()
+    rating = Rating.query.filter_by(id=rating_id, user_id=user_id).first()
+    if not rating:
+        return jsonify({"error": "Valoración no encontrada"}), 404
+
+    data = request.get_json()
+    rate = data.get("rate")
+    if rate is not None:
+        rating.rate = rate
+
+    db.session.commit()
+    return jsonify(rating.to_dict()), 200
+
+@app.route("/valoraciones/<int:rating_id>", methods=["DELETE"])
+@jwt_required()
+def delete_rating(rating_id):
+    user_id = get_jwt_identity()
+    rating = Rating.query.filter_by(id=rating_id, user_id=user_id).first()
+    if not rating:
+        return jsonify({"error": "Valoración no encontrada"}), 404
+
+    db.session.delete(rating)
+    db.session.commit()
+    return jsonify({"message": "Valoración eliminada"}), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

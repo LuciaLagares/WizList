@@ -22,6 +22,8 @@ interface DetailList {
   title: string;
   description: string;
   is_public: boolean;
+  user_id: number;
+  username: string;
   items: Item[];
 }
 
@@ -50,12 +52,13 @@ export default function DetailList(){
     if(!lista) return <div>Error al cargar tu lista</div>
 
 return (
-  <div className="flex flex-col min-h-screen mx-6">
+  <div className="flex flex-col min-h-screen mx-6 bg-base-100">
     <NavBar />
 
     <div className="mt-8 mb-4">
       <h1 className="text-4xl font-bold">{lista.title}</h1>
-      {lista.description && <p className="text-gray-500 mt-2">{lista.description}</p>}
+      <h2 className="text-xl font-semibold text-base-content">{lista.username}</h2>
+      {lista.description && <p className="text-base-content/70 mt-2">{lista.description}</p>}
       <span className={`badge mt-2 ${lista.is_public ? "badge-success" : "badge-error"}`}>
         {lista.is_public ? "pública" : "privada"}
       </span>
@@ -77,7 +80,7 @@ return (
                 </figure>
                 <div className="card-body p-3">
                   <h3 className="card-title text-sm">{item.name}</h3>
-                  {item.house && <p className="text-xs text-gray-500">{item.house}</p>}
+                  {item.house && <p className="text-xs text-base-content/70">{item.house}</p>}
                 </div> 
                 {item.spells.length > 0 && (
                     <div>
@@ -97,7 +100,7 @@ return (
     )}
 
     {lista.items.length === 0 && (
-      <p className="text-gray-500">Esta lista está vacía.</p>
+      <p className="text-base-content/70">Esta lista está vacía.</p>
     )}
   </div>
 );

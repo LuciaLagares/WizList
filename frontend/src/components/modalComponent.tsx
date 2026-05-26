@@ -55,7 +55,7 @@ function Card({ id, name, house, image, spells }: CharacterProps) {
 
   return (
     <>
-      <div className="card card-side bg-indigo-600 shadow-sm h-48">
+      <div className="card card-side bg-secondary shadow-sm h-48">
         <Link to={`/character/${id}/spells`}>
           <figure className="h-full w-40">
             <img
@@ -78,21 +78,21 @@ function Card({ id, name, house, image, spells }: CharacterProps) {
 
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-80">
+        <div className="fixed inset-0 bg-base-200 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-base-100 rounded-lg p-6 w-80">
             <h3 className="text-lg font-bold mb-4">Añadir a una lista</h3>
 
             {mensaje ? (
-              <p className="text-center text-green-600 font-semibold">{mensaje}</p>
+              <p className="text-center text-success font-semibold">{mensaje}</p>
             ) : lists.length === 0 ? (
-              <p className="text-gray-500">No tienes listas creadas.</p>
+              <p className="text-base-content/80">No tienes listas creadas.</p>
             ) : (
               <ul className="flex flex-col gap-2">
                 {lists.map((list) => (
                   <li key={list.id}>
                     <button
                       onClick={() => addToList(list.id)}
-                      className="w-full text-left px-4 py-2 rounded hover:bg-indigo-100 border border-gray-200"
+                      className="w-full text-left px-4 py-2 rounded hover:bg-accent border border-base-300"
                     >
                       {list.title}
                     </button>
@@ -103,7 +103,7 @@ function Card({ id, name, house, image, spells }: CharacterProps) {
 
             <button
               onClick={() => setShowModal(false)}
-              className="mt-4 text-sm text-gray-400 hover:text-gray-600 w-full text-center"
+              className="mt-4 text-sm text-base-content/80 hover:text-accent w-full text-center"
             >
               Cancelar
             </button>

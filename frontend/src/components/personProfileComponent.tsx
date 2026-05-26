@@ -18,12 +18,12 @@ export default function PersonProfile(){
     const iniciales = datos.usuario.username.slice(0,2).toUpperCase();
 
       return (
-    <div className="flex flex-col min-h-screen mx-6">
+    <div className="flex flex-col min-h-screen mx-6 bg-base-100">
       <NavBar />
       <section className="p-6">
         <div className="flex items-center gap-4 mb-7">
           <div className="avatar avatar-placeholder">
-            <div className="bg-red-200 text-black w-16 flex items-center justify-center rounded-full">
+            <div className="bg-primary text-primary-content w-16 flex items-center justify-center rounded-full">
               <span className="text-lg">{iniciales}</span>
             </div>
           </div>
@@ -34,17 +34,17 @@ export default function PersonProfile(){
       <section className="px-6">
         <h2 className="font-bold text-xl mb-4">Listas públicas</h2>
         {datos.listas.length === 0 ? (
-          <p className="text-gray-500">No tiene listas públicas.</p>
+          <p className="text-base-content/70">No tiene listas públicas.</p>
         ) : (
           <div className="flex flex-col gap-3">
             {datos.listas.map((lista: any) => (
               <div
                 key={lista.id}
                 onClick={() => navigate(`/list/${lista.id}`)}
-                className="border rounded-xl p-4 cursor-pointer"
+                className="border border-base-300 rounded-xl p-4 cursor-pointer bg-base-100"
               >
                 <h3 className="font-bold">{lista.title}</h3>
-                {lista.description && <p className="text-gray-500 text-sm">{lista.description}</p>}
+                {lista.description && <p className="text-base-content/70 text-sm">{lista.description}</p>}
               </div>
             ))}
           </div>

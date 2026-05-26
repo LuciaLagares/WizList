@@ -32,7 +32,7 @@ function Login() {
     };
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-base-200">
+        <div className="flex justify-center items-center min-h-screen bg-base-100">
             <div className="card w-96 bg-base-100 shadow-xl">
                 <div className="card-body">
                     <h2 className="card-title justify-center text-2xl font-bold">WizList Login</h2>
