@@ -114,11 +114,13 @@ def get_profile():
         "valoraciones": valoraciones_resultado
     }), 200
 
-@app.route("/api/characters")
-def get_characters():
+def fetch_characters():
     response = requests.get('https://hp-api.onrender.com/api/characters')
     response.raise_for_status()
     return response.json()
+
+def get_characters():
+    return jsonify(fetch_characters())
 
 @app.route("/api/spells")
 def get_spells():
@@ -128,11 +130,18 @@ def get_spells():
 
 @app.route("/show-characters", methods=["GET"])
 def characters_spells():
-    characters = get_characters()
+    characters = fetch_characters()
     spells = get_spells()
-    result = []
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 6, type=int)
 
-    for character in characters:
+    total = len(characters)
+    start = (page - 1) * per_page
+    end = start + per_page
+    characters_page = characters[start:end]
+
+    result = []
+    for character in characters_page:
         result.append({
             "id": character.get("id"),
             "name": character.get("name"),
@@ -140,11 +149,19 @@ def characters_spells():
             "image": character.get("image"),
             "spells": random.sample(spells, min(5, len(spells)))
         })
-    return jsonify(result)
+
+    return jsonify({
+        "characters": result,
+        "total": total,
+        "pages": -(-total // per_page),
+        "current_page": page,
+        "has_next": end < total,
+        "has_prev": page > 1
+    })
 
 @app.route("/character/<string:character_id>/spells", methods=["GET"])
 def character_spells(character_id):
-    characters = get_characters()
+    characters = fetch_characters()
     spells = get_spells()
 
     character = next(
@@ -156,9 +173,11 @@ def character_spells(character_id):
         return jsonify({"error": f"Personaje '{character_id}' no encontrado"}), 404
 
     return jsonify({
+        "id": character.get("id"),
         "name": character.get("name"),
         "house": character.get("house"),
         "image": character.get("image"),
+        "alternate_names": character.get("alternate_names", []),
         "spells": random.sample(spells, min(3, len(spells)))
     })
 

@@ -14,7 +14,7 @@ function Card({ id, name, house, image }: CharacterProps) {
 
   return (
     <>
-      <div className="card card-side bg-base-100 shadow-sm h-48">
+      <div className="card card-side bg-base-100 shadow-sm h-48 border-accent">
         <Link to={`/character/${id}/spells`}>
           <figure className="h-full w-40">
             <img

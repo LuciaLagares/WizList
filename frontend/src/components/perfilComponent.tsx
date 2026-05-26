@@ -127,14 +127,14 @@ const iniciales = data.usuario.username.slice(0, 2).toUpperCase()
       <main className="flex flex-col gap-3 bg-base-100 min-h-screen">
       <NavBar />
 
-      <section className="px-6 pt-5 pb-2">
-        <div className="flex items-center gap-3">
+    <section className="p-6">
+        <div className="flex items-center gap-4 mb-7">
           <div className="avatar avatar-placeholder">
-            <div className="bg-primary text-primary-content w-10 flex items-center justify-center rounded-full">
-              <span className="text-sm">{iniciales}</span>
+            <div className="bg-primary text-primary-content w-16 flex items-center justify-center rounded-full">
+              <span className="text-lg">{iniciales}</span>
             </div>
           </div>
-          <h1 className="font-bold text-xl text-base-content">{data.usuario.username}</h1>
+          <h1 className="font-bold text-4xl">{data.usuario.username}</h1>
         </div>
       </section>
       <div className="divider m-6"></div>

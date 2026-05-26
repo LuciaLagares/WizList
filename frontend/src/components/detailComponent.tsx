@@ -22,7 +22,10 @@ function Details(){
     useEffect(() =>{
         fetch(`http://localhost:5000/character/${id}/spells`)
         .then(res => res.json())
-        .then(data => setCharacter(data));
+        .then(data => {
+            setCharacter(data);
+            console.log(data);
+        });
     }, [id]);
 
     useEffect(() => {

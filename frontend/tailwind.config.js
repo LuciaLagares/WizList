@@ -1,5 +1,3 @@
-import daisyui from "daisyui";
-
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -10,11 +8,10 @@ export default {
     extend: {},
   },
   plugins: [require("daisyui")],
-
   daisyui: {
     themes: [
       {
-          hogwarts: {
+        hogwarts: {
           "primary": "#740001",
           "primary-content": "#D3A625",
           "secondary": "#D3A625",
@@ -34,4 +31,3 @@ export default {
     ]
   }
 }
-
