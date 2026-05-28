@@ -38,6 +38,7 @@ function Perfil(){
     const [loading, setLoading] = useState(true); 
     const [editModal, setEditModal] = useState<Valoracion | null>(null)
     const [deleteModal, setDeleteModal] =  useState<Valoracion | null>(null)
+    const [deleteModalList, setDeleteModalList] = useState<Lista | null>(null)
     const [editRate, setEditRate] = useState(0)
 
     const navigate = useNavigate()
@@ -112,6 +113,25 @@ const handleDelete = () => {
 .catch((e) => console.error(e))
 }
 
+const handleDeleteList = () => {
+  if(!deleteModalList) return;
+  fetch(`http://localhost:5000/listas/${deleteModalList.id}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": `Bearer ${localStorage.getItem("token")}`
+    }
+  })
+  .then((res) => {
+    if(!res.ok) throw new Error("Error in deleting")
+      setData(prev => prev ? {
+    ...prev,
+    listas: prev.listas.filter(l => l.id !== deleteModalList.id)
+  }: prev)
+  setDeleteModalList(null)
+})
+.catch((e) => console.error(e))
+}
+
 if (loading) {
   return (
     <div className="h-screen flex items-center justify-center">
@@ -129,10 +149,8 @@ const iniciales = data.usuario.username.slice(0, 2).toUpperCase()
 
     <section className="p-6">
         <div className="flex items-center gap-4 mb-7">
-          <div className="avatar avatar-placeholder">
-            <div className="bg-primary text-primary-content w-16 flex items-center justify-center rounded-full">
-              <span className="text-lg">{iniciales}</span>
-            </div>
+            <div className="bg-primary text-primary-content w-16 h-16 flex items-center justify-center rounded-full">
+              <span className="text-lg font-semibold">{iniciales}</span>
           </div>
           <h1 className="font-bold text-4xl">{data.usuario.username}</h1>
         </div>
@@ -145,17 +163,38 @@ const iniciales = data.usuario.username.slice(0, 2).toUpperCase()
         ) : (
           <div className="flex flex-col gap-3">
             {data.listas.map(lista => (
+              <>
               <div
                 key={lista.id}
-                onClick={() => navigate(`/list/${lista.id}`)}
-                className="flex items-center justify-between border border-base-300 bg-base-100 rounded-lg p-4 cursor-pointer"
-              >
-                <span className="font-bold">{lista.title}</span>
+                className="flex items-center justify-between border border-base-300 bg-base-100 rounded-lg p-3"
+                >
+                <span className="font-bold cursor-pointer" onClick={() => navigate(`/list/${lista.id}`)}>{lista.title}</span>
+                <button onClick={() => setDeleteModalList(lista)}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                    <path d="M0 0h24v24H0z" fill="none" />
+                    <path fill="#b0b0b0" d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zM9 17h2V8H9zm4 0h2V8h-2zM7 6v13z" />
+                  </svg>
+                </button>
                 <span className={`badge ${lista.is_public ? "badge-success" : "badge-error"}`}>
                   {lista.is_public ? "pública" : "privada"}
                 </span>
               </div>
+              
+              </>
             ))}
+            {deleteModalList && (
+              <dialog open className="modal modal-open">
+                <div className="modal-box">
+                  <h3 className="font-bold text-lg mb-2">¿Eliminar lista?</h3>
+                  <p>¿Seguro que quieres eliminar la lista <span className="font-semibold">{deleteModalList.title}</span>?</p>
+                  <div className="modal-action">
+                    <button className="btn btn-error" onClick={handleDeleteList}>Eliminar</button>
+                    <button className="btn" onClick={() => setDeleteModalList(null)}>Cancelar</button>
+                  </div>
+                </div>
+                <div className="modal-backdrop" onClick={() => setDeleteModalList(null)} />
+              </dialog>
+            )}
           </div>
         )}
       </section>
@@ -169,8 +208,26 @@ const iniciales = data.usuario.username.slice(0, 2).toUpperCase()
                 <img  className="w-10 h-12 object-cover rounded" src={v.character?.image || "../../images/image_not_provided.png"} alt={v.character?.name} />
                 <span>{v.character?.name}</span>
                 <span className="estrellas">{"★".repeat(v.rate)}{"☆".repeat(5 - v.rate)}</span>
-                <button onClick={() => openEditModal(v)}>✏️</button>
-                <button onClick={() => setDeleteModal(v)}>🗑️</button>
+                <button onClick={() => openEditModal(v)}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                    <path d="M0 0h24v24H0z" fill="none" />
+                    <g fill="none" stroke="#b0b0b0" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                      <path stroke-dasharray="44" stroke-dashoffset="44" d="M7 17v-4l10 -10l4 4l-10 10h-4">
+                        <animate fill="freeze" attributeName="stroke-dashoffset" begin="0.3s" dur="0.5s" to="0" />
+                      </path>
+                      <path stroke-dasharray="20" d="M3 21h18">
+                        <animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="20;0" />
+                      </path>
+                      <path stroke-dasharray="8" stroke-dashoffset="8" d="M14 6l4 4"></path>
+                    </g>
+                  </svg>
+                </button>
+                <button onClick={() => setDeleteModal(v)}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                    <path d="M0 0h24v24H0z" fill="none" />
+                    <path fill="#b0b0b0" d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zM9 17h2V8H9zm4 0h2V8h-2zM7 6v13z" />
+                  </svg>
+                </button>
               </div>
             ))
         }

@@ -26,7 +26,7 @@ const [characters, setCharacters] = useState([]);
       
         <div className="grid grid-cols-3 gap-6 p-4">
           {characters.map((character: any) => (
-            <div key={character.id}>
+            <div key={character.id} className="border border-base-300 rounded-xl p-2 ">
               <Card {...character} />
             </div>
           ))}
@@ -39,7 +39,7 @@ const [characters, setCharacters] = useState([]);
           onClick={() => setCurrentPage(p => p - 1)}
           disabled={currentPage === 1}
         >
-          ← Anterior
+          Anterior
         </button>
         <span>Página {currentPage} de {totalPages}</span>
         <button
@@ -47,7 +47,7 @@ const [characters, setCharacters] = useState([]);
           onClick={() => setCurrentPage(p => p + 1)}
           disabled={currentPage === totalPages}
         >
-          Siguiente →
+          Siguiente
         </button>
       </div>
     </div>

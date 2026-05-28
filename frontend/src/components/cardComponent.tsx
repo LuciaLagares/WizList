@@ -5,7 +5,7 @@ export interface CharacterProps {
   name: string;
   house: string;
   image: string;
-  alternate_names: string[];
+  alternate_names?: string[];
   spells: { name: string; description: string }[];
 }
 

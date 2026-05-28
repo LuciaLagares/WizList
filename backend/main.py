@@ -204,32 +204,16 @@ def add_to_list(list_id):
         )
         db.session.add(character)
 
-    for spell_data in data.get("spells", []):
-        spell = Spell.query.get(spell_data["id"])
-        if not spell:
-            spell = Spell(
-                id=spell_data["id"],
-                name=spell_data["name"],
-                description=spell_data.get("description")
-            )
-            db.session.add(spell)
-        if spell not in character.spells:
-            character.spells.append(spell)
-
     ya_existe = ListItem.query.filter_by(
-        list_id=list_id,
-        character_id=data["character_id"]
+    list_id=list_id,
+    character_id=data["character_id"]
     ).first()
     if ya_existe:
         return jsonify({"error": "El personaje ya está en la lista"}), 409
-
-    item = ListItem(
-        list_id=list_id,
-        character_id=data["character_id"]
-    )
+    
+    item = ListItem(list_id=list_id, character_id=data["character_id"], spells=data.get("spells", []))
     db.session.add(item)
     db.session.commit()
-
     return jsonify({"message": "Personaje añadido"}), 201
 
 @app.route('/my-lists', methods=["GET"])
@@ -275,19 +259,13 @@ def show_list(list_id):
     for i in lista.items:
         if i.character_id:
             character = Character.query.get(i.character_id)
-            spell_list = []
-            for spell in character.spells:
-                spell_list.append({
-                    "name": spell.name,
-                    "description": spell.description
-                })
             items.append({
                 "tipo": "character",
                 "id": character.id,
                 "name": character.name,
                 "house": character.house,
                 "image": character.image,
-                "spells": spell_list
+                "spells": i.spells or []
             })
     return jsonify({
         "id": lista.id,
@@ -405,6 +383,18 @@ def delete_rating(rating_id):
     db.session.delete(rating)
     db.session.commit()
     return jsonify({"message": "Valoración eliminada"}), 200
+
+@app.route("/listas/<int:lista_id>", methods=["DELETE"])
+@jwt_required()
+def delete_list(lista_id):
+    user_id = get_jwt_identity()
+    lista = List.query.filter_by(id=lista_id, user_id=user_id).first()
+    if not lista:
+        return jsonify({"error": "Lista no encontrada"}), 404
+
+    db.session.delete(lista)
+    db.session.commit()
+    return jsonify({"message": "Lista eliminada"}), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

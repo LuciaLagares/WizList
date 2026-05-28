@@ -54,10 +54,10 @@ export default function DetailList(){
 return (
   <div className="flex flex-col min-h-screen mx-6 bg-base-100">
     <NavBar />
-
-    <div className="mt-8 mb-4">
+    <div className="divider m-6"></div>
+    <div className=" mb-4">
       <h1 className="text-4xl font-bold">{lista.title}</h1>
-      <h2 className="text-xl font-semibold text-base-content">{lista.username}</h2>
+      <h2 className="text-xl font-semibold text-base-content mt-2 mb-2">{lista.username}</h2>
       {lista.description && <p className="text-base-content/70 mt-2">{lista.description}</p>}
       <span className={`badge mt-2 ${lista.is_public ? "badge-success" : "badge-error"}`}>
         {lista.is_public ? "pública" : "privada"}

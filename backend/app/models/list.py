@@ -11,7 +11,7 @@ class List(db.Model):
     is_public = db.Column(db.Boolean, default=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
-    items = db.relationship('ListItem', backref='parent_list')
+    items = db.relationship('ListItem', backref='parent_list', cascade="all, delete-orphan")
 
     def to_dict(self):
             return {

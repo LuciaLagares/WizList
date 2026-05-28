@@ -112,11 +112,15 @@ const handleRate = async (puntuacion: number) => {
             <NavBar />
             <div className="flex-1 mb-16 mt-8">
                 <h1 className="text-4xl font-bold text-center mb-4">{character.name}</h1>
-                <h2 className="text-lg text-secondary-content text-center mb-3">{character.alternate_names?.join(", ")}</h2>
+               {character.alternate_names && character.alternate_names.length > 0 && (
+                    <h2 className="text-lg text-secondary-content text-center mb-3">
+                        {character.alternate_names.join(", ")}
+                    </h2>
+                )}
                 <div className="flex justify-center">
                     <div className="grid lg:grid-cols-2 md:w-2/3 mt-5 p-5 border-2 border-base-300 rounded-lg">
                         <div className="p-3 flex flex-col items-center justify-center">
-                            <img className="w-full h-full object-cover rounded-lg" src={character.image || '../../images/image_not_provided.png'} alt={character.name} />
+                            <img className="w-72 h-96 object-cover rounded-lg" src={character.image || '../../images/image_not_provided.png'} alt={character.name} />
                         </div>
                         <div className="py-2">
                             <table className="table-auto">
@@ -149,13 +153,14 @@ const handleRate = async (puntuacion: number) => {
                                 </li>
                             ))}
                             </ul>
+                            <div className="flex justify-end mt-6">
+                                <button onClick={openModal} className="btn btn-primary w-36 text-center">
+                                    Add
+                                </button>
+                            </div>
+                
                         </div>
                     </div>
-                </div>
-                 <div className="card-actions justify-end">
-                    <button onClick={openModal} className="btn btn-primary p-5">
-                    Add
-                    </button>
                 </div>
                 {showModal && (
             <div className="fixed inset-0 bg-base-200 bg-opacity-50 flex items-center justify-center z-50">
@@ -177,7 +182,7 @@ const handleRate = async (puntuacion: number) => {
                     Crear
                     </button>
                     <button onClick={() => setCreando(false)} className="text-sm text-base-content/80">
-                    Cancelar
+                    Volver
                     </button>
                 </div>
                 ) : lists.length === 0 ? (

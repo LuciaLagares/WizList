@@ -8,4 +8,4 @@ class ListItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     list_id = db.Column(db.Integer, db.ForeignKey('list.id'), nullable=False)
     character_id = db.Column(db.String(100), db.ForeignKey('character.id'), nullable=True)
-    spell_id = db.Column(db.String(100), db.ForeignKey('spell.id'), nullable=True)
+    spells = db.Column(db.JSON, nullable=True) 

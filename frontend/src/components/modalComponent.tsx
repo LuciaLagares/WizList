@@ -105,7 +105,6 @@ function Card({ id, name, house, image, spells }: CharacterProps) {
               onClick={() => setShowModal(false)}
               className="mt-4 text-sm text-base-content/80 hover:text-accent w-full text-center"
             >
-              Cancelar
             </button>
           </div>
         </div>

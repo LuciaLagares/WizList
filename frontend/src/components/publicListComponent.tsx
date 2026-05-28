@@ -45,47 +45,57 @@ export default function PublicLists() {
         <>
           <div className="flex flex-col gap-4 max-w-2xl mx-auto w-full">
             {listas.map(lista => (
-              <div key={lista.id} className="border border-base-300 rounded-xl p-5 bg-base-100">
-                <div
-                  className="flex items-center gap-3 mb-3 cursor-pointer"
-                  onClick={() => navigate(`/${lista.user_id}/perfil`)}
-                >
-                  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-content font-bold text-sm">
-                    {lista.username.slice(0, 2).toUpperCase()}
-                  </div>
-                  <p className="font-semibold text-sm">{lista.username}</p>
-                </div>
-                <h2 className="font-bold text-lg">{lista.title}</h2>
-                {lista.description && (
-                  <p className="text-base-content/70 text-sm mt-1">{lista.description}</p>
-                )}
-                <div
-                  className="mt-3 text-xs text-secondary font-medium cursor-pointer"
-                  onClick={() => navigate(`/list/${lista.id}`)}
-                >
-                  Ver lista
-                </div>
-              </div>
+    <div key={lista.id} className="border border-base-300 rounded-xl p-5 bg-base-100 flex justify-between items-start">
+        <div>
+          <div
+            className="flex items-center gap-3 mb-3 cursor-pointer"
+            onClick={() => navigate(`/${lista.user_id}/perfil`)}
+          >
+            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-content font-bold text-sm">
+              {lista.username.slice(0, 2).toUpperCase()}
+            </div>
+            <p className="font-semibold text-sm">{lista.username}</p>
+          </div>
+          <h2 className="font-bold text-lg">{lista.title}</h2>
+          {lista.description && (
+            <p className="text-base-content/70 text-sm mt-1">{lista.description}</p>
+          )}
+          <div
+            className="mt-3 text-xs text-secondary font-medium cursor-pointer"
+            onClick={() => navigate(`/list/${lista.id}`)}
+          >
+            Ver lista
+          </div>
+        </div>
+
+        <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
+          <path d="M0 0h24v24H0z" fill="none" />
+          <path fill="none" stroke="#b0b0b0" strokeDasharray="30" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c0 0 0 0 -0.76 -1c-0.88 -1.16 -2.18 -2 -3.74 -2c-2.49 0 -4.5 2.01 -4.5 4.5c0 0.93 0.28 1.79 0.76 2.5c0.81 1.21 8.24 9 8.24 9M12 8c0 0 0 0 0.76 -1c0.88 -1.16 2.18 -2 3.74 -2c2.49 0 4.5 2.01 4.5 4.5c0 0.93 -0.28 1.79 -0.76 2.5c-0.81 1.21 -8.24 9 -8.24 9">
+            <animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="30;0" />
+          </path>
+        </svg>
+
+    </div>
             ))}
           </div>
 
           <div className="flex justify-center items-center gap-4 mt-8 mb-6">
             <button
-              className="btn btn-sm"
+              className="btn btn-primary"
               disabled={page === 1}
               onClick={() => setPage(p => p - 1)}
             >
-              ← Anterior
+              Anterior
             </button>
             <span className="text-sm text-base-content/70">
               Página {page} de {totalPages}
             </span>
             <button
-              className="btn btn-sm"
+              className="btn btn-primary"
               disabled={page === totalPages}
               onClick={() => setPage(p => p + 1)}
             >
-              Siguiente →
+              Siguiente
             </button>
           </div>
         </>

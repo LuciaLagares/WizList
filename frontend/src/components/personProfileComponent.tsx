@@ -22,15 +22,13 @@ export default function PersonProfile(){
       <NavBar />
       <section className="p-6">
         <div className="flex items-center gap-4 mb-7">
-          <div className="avatar avatar-placeholder">
-            <div className="bg-primary text-primary-content w-16 flex items-center justify-center rounded-full">
-              <span className="text-lg">{iniciales}</span>
-            </div>
+            <div className="bg-primary text-primary-content w-16 h-16 flex items-center justify-center rounded-full">
+              <span className="text-lg font-semibold">{iniciales}</span>
           </div>
           <h1 className="font-bold text-4xl">{datos.usuario.username}</h1>
         </div>
       </section>
-
+      <div className="divider m-6"></div>
       <section className="px-6">
         <h2 className="font-bold text-xl mb-4">Listas públicas</h2>
         {datos.listas.length === 0 ? (
@@ -50,6 +48,7 @@ export default function PersonProfile(){
           </div>
         )}
       </section>
+      <div className="divider m-6"></div>
     </div>
   );
 }
