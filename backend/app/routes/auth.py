@@ -3,14 +3,24 @@ from flask_jwt_extended import create_access_token
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.db import db
 from app.models.user import User
- 
+from app.validations import validates
+
 auth_bp = Blueprint("auth", __name__)
  
 @auth_bp.route("/register", methods=["POST"])
 def register():
-    data = request.get_json()
-    username = data.get("username")
-    password = data.get("password")
+    data = request.get_json() or {}
+
+    err, status = validates({
+        "username": {"required": True, "type": str, "min_length": 3, "max_length": 80},
+        "password": {"required": True, "type": str, "min_length": 3, "max_length": 256},
+    }, data)
+
+    if err:
+        return err, status
+    
+    username = data['username'].strip()
+    password = data['password']
  
     if User.query.filter_by(username=username).first():
         return jsonify({"message": "El nombre ya es de un usuario"}), 409
@@ -32,9 +42,17 @@ def register():
  
 @auth_bp.route("/login", methods=["POST"])
 def login():
-    data = request.get_json()
-    username = data.get("username")
-    password = data.get("password")
+    data = request.get_json() or {}
+
+    err, status = validates({
+        "username": {"required": True, "type": str},
+        "password": {"required": True, "type": str},
+    }, data)
+    if err:
+        return err, status
+    
+    username = data['username'].strip()
+    password = data['password']
  
     user = User.query.filter_by(username=username).first()
     if not user or not check_password_hash(user.password, password):

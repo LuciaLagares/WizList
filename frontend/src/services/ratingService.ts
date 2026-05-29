@@ -4,12 +4,9 @@ const BACKEND = "http://localhost:5000";
 
 export class RatingService {
   static async getCharacterById(characterID: string) {
-    const response = await fetch(
-      `${BACKEND}/rating/characters/${characterID}`,
-      {
-        headers: AuthService.authHeader(),
-      },
-    );
+    const response = await fetch(`${BACKEND}/rating/character/${characterID}`, {
+      headers: AuthService.authHeader(),
+    });
     if (!response.ok) return null;
 
     return response.json();

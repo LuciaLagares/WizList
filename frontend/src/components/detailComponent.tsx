@@ -7,6 +7,8 @@ import { CharactersService } from "../services/charactersService";
 import { AuthService } from "../services/authService";
 import { RatingService } from "../services/ratingService";
 import { ListService } from "../services/listService";
+import { useToast } from "../hooks/useToast";
+import ToastComponent from "./toatsComponent";
 
 
 
@@ -14,7 +16,8 @@ function Details(){
     const {id} = useParams();
     const navigate = useNavigate();
 
-    
+    const {toasts, showToast} = useToast();
+
     const [character, setCharacter] = useState<CharacterProps | null>(null)
     const [showModal, setShowModal] = useState(false);
     const [lists, setLists] = useState<{ id: number; title: string }[]>([]);
@@ -26,14 +29,14 @@ function Details(){
     useEffect(() =>{
         CharactersService.getCharacterById(id!)
         .then(setCharacter)
-        .catch(console.error)
+        .catch(() => showToast("Error al cargar el personaje", 'error'))
     }, [id]);
 
     useEffect(() => {
         if(!AuthService.isAuthenthicated()) return;
         RatingService.getCharacterById(id!)
         .then(setRating)
-        .catch(console.error);
+        .catch(() => showToast("Error al cargar la valoración", 'error'))
     }, [id])
 
     if(!character) return <div>Loading ....</div>
@@ -78,6 +81,7 @@ const handleRate = async (puntuacion: number) => {
 
     return(
         <div className="flex flex-col min-h-screen mx-6 bg-base-100">
+            <ToastComponent toasts={toasts} />
             <NavBar />
             <div className="flex-1 mb-16 mt-8">
                 <h1 className="text-4xl font-bold text-center mb-4">{character.name}</h1>

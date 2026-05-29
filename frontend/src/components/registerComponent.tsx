@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthService } from "../services/authService";
+import { useToast } from "../hooks/useToast";
+import ToastComponent from "./toatsComponent";
 
 function Registrer(){
+  const {toasts, showToast} = useToast();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
@@ -16,13 +19,14 @@ function Registrer(){
         if (err.message === "El nombre de usuario ya existe") {
             navigate('/login');
         } else {
-            alert(err.message);
+            showToast("No se ha podido registrar", 'error')
         }
     }
   };
   
   return(
     <div className="flex justify-center items-center min-h-screen bg-base-100">
+      <ToastComponent toasts={toasts} />
       <div className="card w-96 bg-base-100 shadow-xl">
         <div className="card-body">
           <h2 className="card-title justify-center text-2xl font-bold">WizList Register</h2>

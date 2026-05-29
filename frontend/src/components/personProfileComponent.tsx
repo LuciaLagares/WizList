@@ -2,16 +2,19 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import NavBar from "./navBarComponent";
 import { ProfileService } from "../services/profileService";
+import { useToast } from "../hooks/useToast";
+import ToastComponent from "./toatsComponent";
 
 export default function PersonProfile(){
     const {id} = useParams();
+    const {toasts, showToast} = useToast();
     const navigate = useNavigate();
     const [datos, setDatos] = useState<any>({ usuario: null, listas: [] });
     
     useEffect(() =>{
          ProfileService.getOthersProfile(Number(id))
         .then(setDatos)
-        .catch(console.error);
+        .catch(() => showToast("Error al cargar el perfil", 'error'));
 }, [id]);
     
     if(!datos.usuario) return <div> No datos</div>
@@ -20,6 +23,7 @@ export default function PersonProfile(){
 
       return (
     <div className="flex flex-col min-h-screen mx-6 bg-base-100">
+      <ToastComponent toasts={toasts} />
       <NavBar />
       <section className="p-6">
         <div className="flex items-center gap-4 mb-7">

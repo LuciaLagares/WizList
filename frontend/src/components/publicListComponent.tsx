@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NavBar from "./navBarComponent";
 import { ListService } from "../services/listService";
+import { useToast } from "../hooks/useToast";
+import ToastComponent from "./toatsComponent";
 
 interface ListaPublica {
   id: number;
@@ -12,6 +14,7 @@ interface ListaPublica {
 }
 
 export default function PublicLists() {
+  const {toasts, showToast} = useToast();
   const [listas, setListas] = useState<ListaPublica[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -24,7 +27,7 @@ export default function PublicLists() {
             setListas(data.listas);
             setTotalPages(data.pages);
         })
-        .catch(console.error)
+        .catch(() => showToast("Error cargando las listas", 'error'))
         .finally(() => setLoading(false));
 }, [page]);
 
@@ -35,71 +38,66 @@ export default function PublicLists() {
   );
 
   return (
-    <div className="flex flex-col min-h-screen mx-6 bg-base-100">
+    <div className="flex flex-col min-h-screen bg-base-100">
+      <ToastComponent toasts={toasts} />
       <NavBar />
-      <h1 className="text-3xl font-bold mt-8 mb-6">Listas públicas</h1>
-
-      {listas.length === 0 ? (
-        <p className="text-base-content/70">No hay listas públicas todavía.</p>
-      ) : (
-        <>
-          <div className="flex flex-col gap-4 max-w-2xl mx-auto w-full">
-            {listas.map(lista => (
-    <div key={lista.id} className="border border-base-300 rounded-xl p-5 bg-base-100 flex justify-between items-start">
-        <div>
-          <div
-            className="flex items-center gap-3 mb-3 cursor-pointer"
-            onClick={() => navigate(`/${lista.user_id}/perfil`)}
-          >
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-content font-bold text-sm">
-              {lista.username.slice(0, 2).toUpperCase()}
+ 
+      <div className="px-4 sm:px-8 max-w-2xl mx-auto w-full">
+        <h1 className="text-2xl sm:text-3xl font-bold mt-8 mb-6">Listas públicas</h1>
+ 
+        {listas.length === 0 ? (
+          <p className="text-base-content/70">No hay listas públicas todavía.</p>
+        ) : (
+          <>
+            <div className="flex flex-col gap-4">
+              {listas.map(lista => (
+                <div key={lista.id} className="border border-base-300 rounded-xl p-4 sm:p-5 bg-base-100 flex justify-between items-start gap-3">
+                  <div className="min-w-0">
+                    <div
+                      className="flex items-center gap-3 mb-3 cursor-pointer"
+                      onClick={() => navigate(`/${lista.user_id}/perfil`)}
+                    >
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary flex items-center justify-center text-primary-content font-bold text-xs sm:text-sm shrink-0">
+                        {lista.username.slice(0, 2).toUpperCase()}
+                      </div>
+                      <p className="font-semibold text-sm truncate">{lista.username}</p>
+                    </div>
+                    <h2 className="font-bold text-base sm:text-lg">{lista.title}</h2>
+                    {lista.description && (
+                      <p className="text-base-content/70 text-sm mt-1 line-clamp-2">{lista.description}</p>
+                    )}
+                    <div
+                      className="mt-3 text-xs text-secondary font-medium cursor-pointer"
+                      onClick={() => navigate(`/list/${lista.id}`)}
+                    >
+                      Ver lista →
+                    </div>
+                  </div>
+ 
+                  <svg xmlns="http://www.w3.org/2000/svg" className="shrink-0 w-6 h-6" viewBox="0 0 24 24">
+                    <path d="M0 0h24v24H0z" fill="none" />
+                    <path fill="none" stroke="#b0b0b0" strokeDasharray="30" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c0 0 0 0 -0.76 -1c-0.88 -1.16 -2.18 -2 -3.74 -2c-2.49 0 -4.5 2.01 -4.5 4.5c0 0.93 0.28 1.79 0.76 2.5c0.81 1.21 8.24 9 8.24 9M12 8c0 0 0 0 0.76 -1c0.88 -1.16 2.18 -2 3.74 -2c2.49 0 4.5 2.01 4.5 4.5c0 0.93 -0.28 1.79 -0.76 2.5c-0.81 1.21 -8.24 9 -8.24 9">
+                      <animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="30;0" />
+                    </path>
+                  </svg>
+                </div>
+              ))}
             </div>
-            <p className="font-semibold text-sm">{lista.username}</p>
-          </div>
-          <h2 className="font-bold text-lg">{lista.title}</h2>
-          {lista.description && (
-            <p className="text-base-content/70 text-sm mt-1">{lista.description}</p>
-          )}
-          <div
-            className="mt-3 text-xs text-secondary font-medium cursor-pointer"
-            onClick={() => navigate(`/list/${lista.id}`)}
-          >
-            Ver lista
-          </div>
-        </div>
-
-        <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
-          <path d="M0 0h24v24H0z" fill="none" />
-          <path fill="none" stroke="#b0b0b0" strokeDasharray="30" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c0 0 0 0 -0.76 -1c-0.88 -1.16 -2.18 -2 -3.74 -2c-2.49 0 -4.5 2.01 -4.5 4.5c0 0.93 0.28 1.79 0.76 2.5c0.81 1.21 8.24 9 8.24 9M12 8c0 0 0 0 0.76 -1c0.88 -1.16 2.18 -2 3.74 -2c2.49 0 4.5 2.01 4.5 4.5c0 0.93 -0.28 1.79 -0.76 2.5c-0.81 1.21 -8.24 9 -8.24 9">
-            <animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="30;0" />
-          </path>
-        </svg>
-
-    </div>
-            ))}
-          </div>
-
-          <div className="flex justify-center items-center gap-4 mt-8 mb-6">
-            <button
-              className="btn btn-primary"
-              disabled={page === 1}
-              onClick={() => setPage(p => p - 1)}
-            >
-              Anterior
-            </button>
-            <span className="text-sm text-base-content/70">
-              Página {page} de {totalPages}
-            </span>
-            <button
-              className="btn btn-primary"
-              disabled={page === totalPages}
-              onClick={() => setPage(p => p + 1)}
-            >
-              Siguiente
-            </button>
-          </div>
-        </>
-      )}
+ 
+            <div className="flex justify-center items-center gap-4 mt-8 mb-6">
+              <button className="btn btn-primary btn-sm sm:btn-md" disabled={page === 1} onClick={() => setPage(p => p - 1)}>
+                Anterior
+              </button>
+              <span className="text-sm text-base-content/70">
+                {page} / {totalPages}
+              </span>
+              <button className="btn btn-primary btn-sm sm:btn-md" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>
+                Siguiente
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

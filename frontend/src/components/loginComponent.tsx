@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthService } from "../services/authService";
+import { useToast } from "../hooks/useToast";
+import ToastComponent from "./toatsComponent";
 
 function Login() {
+    const { toasts, showToast } = useToast();
+    
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
@@ -14,13 +18,15 @@ function Login() {
         try {
             await AuthService.login(username, password);
             navigate("/show-characters");
-        } catch (err: any) {
-            alert(err.message);
+            showToast("Login correcto!", 'success')
+        } catch { 
+            showToast("Error al loggearte", 'error');
         }
     };
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-base-100">
+            <ToastComponent toasts={toasts} />
             <div className="card w-96 bg-base-100 shadow-xl">
                 <div className="card-body">
                     <h2 className="card-title justify-center text-2xl font-bold">WizList Login</h2>

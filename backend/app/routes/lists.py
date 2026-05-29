@@ -5,6 +5,7 @@ from app.models.list import List
 from app.models.list_item import ListItem
 from app.models.character import Character
 from app.models.user import User
+from app.validations import validates
 
 lists_bp = Blueprint("lists", __name__)
 
@@ -13,7 +14,16 @@ lists_bp = Blueprint("lists", __name__)
 @jwt_required()
 def create_list():
     id_usuario = int(get_jwt_identity())
-    data = request.get_json()
+    data = request.get_json() or {}
+
+    err, status = validates({
+        "title":       {"required": True,  "type": str,  "min_length": 1, "max_length": 100},
+        "description": {"required": False, "type": str,  "max_length": 255},
+        "is_public":   {"required": False, "allowed": [True, False]},
+    }, data)
+
+    if err:
+        return err, status
 
     nueva_lista = List(
         title=data.get("title"),
@@ -73,7 +83,16 @@ def add_to_list(list_id):
     if not lista:
         return jsonify({"error": "Lista no encontrada"}), 404
 
-    data = request.get_json()
+    data = request.get_json() or {}
+
+    err, status = validates({
+        "character_id":   {"required": True, "type": str},
+        "character_name": {"required": True, "type": str, "max_length": 100},
+    }, data)
+
+    if err:
+        return err, status
+    
     character = Character.query.get(data["character_id"])
     if not character:
         character = Character(
@@ -105,7 +124,14 @@ def update_list(list_id):
     if not lista:
         return jsonify({"error": "Lista no encontrada"}), 404
 
-    data = request.get_json()
+    data = request.get_json() or {}
+
+    err, status = validates({
+        "title": {"required": False, "type": str, "min_length": 1, "max_length": 100},
+    }, data)
+
+    if err:
+        return err, status
 
     title = data.get("title")
     if title is not None:

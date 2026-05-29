@@ -4,6 +4,8 @@ import NavBar from "./navBarComponent"
 import { ProfileService } from "../services/profileService"
 import { RatingService } from "../services/ratingService"
 import { ListService } from "../services/listService"
+import { useToast } from "../hooks/useToast"
+import ToastComponent from "./toatsComponent"
 
 interface user {
   id:       number
@@ -44,6 +46,8 @@ function Perfil(){
     const [deleteModalList, setDeleteModalList] = useState<Lista | null>(null)
     const [editRate, setEditRate] = useState(0)
 
+    const {toasts, showToast} = useToast();
+
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -71,8 +75,9 @@ function Perfil(){
                 )
             } : prev)
             setEditModal(null)
+            showToast("Valoración actualizada", 'success')
         })
-        .catch(console.error)
+        .catch(() => showToast("Error al actualizar la valoracion", 'error'))
   }
 
 const handleDelete = () => {
@@ -84,8 +89,9 @@ const handleDelete = () => {
                 valoraciones: prev.valoraciones.filter(v => v.id !== deleteModal.id)
             } : prev)
             setDeleteModal(null)
+            showToast("Valoración borrada con éxito", 'success')
         })
-        .catch(console.error)
+        .catch(() => showToast("Error al eliminar la valoracion", 'error'))
 }
 
 const handleDeleteList = () => {
@@ -97,8 +103,9 @@ const handleDeleteList = () => {
                 listas: prev.listas.filter(l => l.id !== deleteModalList.id)
             } : prev)
             setDeleteModalList(null)
+            showToast("Lista borrada con éxito", 'success')
         })
-        .catch(console.error)
+        .catch(() => showToast("Error al eliminar la lista", 'error'))
 }
 
 if (loading) {
@@ -114,6 +121,7 @@ const iniciales = data.usuario.username.slice(0, 2).toUpperCase()
 
     return (
       <main className="flex flex-col gap-3 bg-base-100 min-h-screen">
+        <ToastComponent toasts={toasts} />
       <NavBar />
 
     <section className="p-6">

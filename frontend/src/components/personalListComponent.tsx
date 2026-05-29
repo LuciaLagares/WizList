@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import NavBar from "./navBarComponent";
 import { ListService } from "../services/listService";
+import { useToast } from "../hooks/useToast";
+import ToastComponent from "./toatsComponent";
 
 interface Spell {
   name: string
@@ -30,13 +32,14 @@ interface DetailList {
 
 export default function DetailList(){
     const { id } = useParams();
+    const {toasts, showToast} = useToast();
     const [lista, setLista] = useState<DetailList | null>(null);
     const [loading, setLoading] = useState(true);
     
     useEffect(() =>{
          ListService.getListById(Number(id))
         .then(setLista)
-        .catch(console.error)
+        .catch(() => showToast("Error al cargar las listas", 'error'))
         .finally(() => setLoading(false));
 }, [id]);
 
@@ -45,6 +48,7 @@ export default function DetailList(){
 
 return (
   <div className="flex flex-col min-h-screen mx-6 bg-base-100">
+    <ToastComponent toasts={toasts} />
     <NavBar />
     <div className="divider m-6"></div>
     <div className=" mb-4">

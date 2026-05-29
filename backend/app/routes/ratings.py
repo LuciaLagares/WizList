@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.db import db
 from app.models.rating import Rating
 from app.models.character import Character
+from app.validations import validates
 
 ratings_bp = Blueprint("ratings", __name__)
 
@@ -11,7 +12,15 @@ ratings_bp = Blueprint("ratings", __name__)
 @jwt_required()
 def create_or_update_rating():
     user_id = get_jwt_identity()
-    data = request.get_json()
+    data = request.get_json() or {}
+
+    err, status = validates({
+        "character_id": {"required": True, "type": str},
+        "rate":         {"required": False, "type": int, "min_value": 1, "max_value": 5},
+    }, data)
+
+    if err:
+        return err, status
 
     character_id = data.get("character_id")
     rate = data.get("rate")
@@ -20,6 +29,11 @@ def create_or_update_rating():
     if character_id:
         character = Character.query.get(character_id)
         if not character:
+            err, status = validates({
+            "character_name": {"required": True, "type": str, "max_length": 100},
+            }, data)
+            if err:
+                return err, status
             character = Character(
                 id=character_id,
                 name=data.get("character_name"),
@@ -65,8 +79,16 @@ def update_rating(rating_id):
     if not rating:
         return jsonify({"error": "Valoración no encontrada"}), 404
 
-    data = request.get_json()
-    rate = data.get("rate")
+    data = request.get_json() or {}
+
+    err, status = validates({
+        "rate": {"required": True, "type": int, "min_value": 1, "max_value": 5},
+    }, data)
+
+    if err:
+        return err, status
+    
+    rate = data["rate"]
     if rate is not None:
         rating.rate = rate
 

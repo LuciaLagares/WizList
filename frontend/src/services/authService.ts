@@ -11,8 +11,15 @@ export class AuthService {
     return this.getToken() !== null;
   }
 
-  static logOut(): void {
-    localStorage.removeItem(this.TOKEN);
+  static async logOut(): Promise<void> {
+    try {
+      await fetch(`${BACKEND}/logout`, {
+        method: "POST",
+        headers: this.authHeader(),
+      });
+    } finally {
+      localStorage.removeItem(this.TOKEN);
+    }
   }
 
   static async login(username: string, password: string): Promise<string> {
