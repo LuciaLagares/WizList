@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { AuthService } from "../services/authService";
 
 function Login() {
     const [username, setUsername] = useState('');
@@ -11,23 +12,10 @@ function Login() {
         e.preventDefault();
 
         try {
-            const response = await fetch('http://localhost:5000/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
-            });
-
-            if (response.ok) {
-                const { access_token } = await response.json();
-                localStorage.setItem("token", access_token)
-                navigate("/show-characters")
-            } else if (response.status === 401) {
-                alert('Usuario o contraseña incorrectos');
-            } else {
-                alert('Error al iniciar sesión');
-            }
-        } catch (error) {
-            console.error('Error de conexión');
+            await AuthService.login(username, password);
+            navigate("/show-characters");
+        } catch (err: any) {
+            alert(err.message);
         }
     };
 

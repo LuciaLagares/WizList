@@ -26,6 +26,8 @@ flask_session/
 __pycache__/
 *.db
 
+.env
+
 backend/Dockerfile
 frontend/Dockerfile
 docker-compose.yml

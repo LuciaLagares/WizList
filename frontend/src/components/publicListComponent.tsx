@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NavBar from "./navBarComponent";
+import { ListService } from "../services/listService";
 
 interface ListaPublica {
   id: number;
@@ -18,15 +19,14 @@ export default function PublicLists() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`http://localhost:5000/public-lists?page=${page}&per_page=3`)
-      .then(res => res.json())
-      .then(data => {
-
-        setListas(data.listas);
-        setTotalPages(data.pages)
-        setLoading(false);
-      });
-  }, [page]);
+    ListService.getAllPublicLists(page, 3)
+        .then(data => {
+            setListas(data.listas);
+            setTotalPages(data.pages);
+        })
+        .catch(console.error)
+        .finally(() => setLoading(false));
+}, [page]);
 
   if (loading) return (
     <div className="flex justify-center mt-10">

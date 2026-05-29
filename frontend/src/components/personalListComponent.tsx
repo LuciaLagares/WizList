@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import NavBar from "./navBarComponent";
+import { ListService } from "../services/listService";
 
 interface Spell {
   name: string
@@ -33,20 +34,11 @@ export default function DetailList(){
     const [loading, setLoading] = useState(true);
     
     useEffect(() =>{
-        fetch(`http://localhost:5000/list/${id}`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${localStorage.getItem("token")}`
-            },
-        })
-        .then((res) => {
-            if(!res.ok) throw new Error("Error al cargar la lista");
-            return res.json();
-        })
-        .then((data) => setLista(data))
-        setLoading(false);
-    }, [id]);
+         ListService.getListById(Number(id))
+        .then(setLista)
+        .catch(console.error)
+        .finally(() => setLoading(false));
+}, [id]);
 
     if(loading) return <div>Cargando tu lista...</div>
     if(!lista) return <div>Error al cargar tu lista</div>

@@ -1,36 +1,26 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthService } from "../services/authService";
 
 function Registrer(){
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+
     const handleSubmit = async (e: any) => {
     e.preventDefault();
-
-    const datosParaEnviar = { 
-    username: username, 
-    password: password 
-  };
-  try{
-      const response = await fetch('http://localhost:5000/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(datosParaEnviar) 
-      });
-      if(response.ok){
-        const { access_token } = await response.json();
-        localStorage.setItem("token", access_token)
+    try {
+        await AuthService.register(username, password);
         navigate('/show-characters');
-      }else if(response.status == 409){
-        navigate('/login');
-      }else{
-        alert("Error al registrar");
-      }
-    }catch(error){
-        console.error('Error de conexión');
-    } 
+    } catch (err: any) {
+        if (err.message === "El nombre de usuario ya existe") {
+            navigate('/login');
+        } else {
+            alert(err.message);
+        }
+    }
   };
+  
   return(
     <div className="flex justify-center items-center min-h-screen bg-base-100">
       <div className="card w-96 bg-base-100 shadow-xl">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import NavBar from "./navBarComponent";
+import { ProfileService } from "../services/profileService";
 
 export default function PersonProfile(){
     const {id} = useParams();
@@ -8,10 +9,10 @@ export default function PersonProfile(){
     const [datos, setDatos] = useState<any>({ usuario: null, listas: [] });
     
     useEffect(() =>{
-        fetch(`http://localhost:5000/${id}/perfil`)
-        .then(res => res.json())
+         ProfileService.getOthersProfile(Number(id))
         .then(setDatos)
-    }, [id]);
+        .catch(console.error);
+}, [id]);
     
     if(!datos.usuario) return <div> No datos</div>
     

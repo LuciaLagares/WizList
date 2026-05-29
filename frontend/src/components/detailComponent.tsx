@@ -3,6 +3,10 @@ import { useEffect, useState } from "react";
 import type { CharacterProps } from "./cardComponent";
 import NavBar from "./navBarComponent";
 import { useNavigate, useParams } from "react-router-dom";
+import { CharactersService } from "../services/charactersService";
+import { AuthService } from "../services/authService";
+import { RatingService } from "../services/ratingService";
+import { ListService } from "../services/listService";
 
 
 
@@ -20,52 +24,35 @@ function Details(){
     const [rating, setRating] = useState<{ id: number; rate: number; is_favorite: boolean } | null>(null)
     
     useEffect(() =>{
-        fetch(`http://localhost:5000/character/${id}/spells`)
-        .then(res => res.json())
-        .then(data => {
-            setCharacter(data);
-            console.log(data);
-        });
+        CharactersService.getCharacterById(id!)
+        .then(setCharacter)
+        .catch(console.error)
     }, [id]);
 
     useEffect(() => {
-        const token = localStorage.getItem("token")
-        if (!token) return
-
-        fetch(`http://localhost:5000/rating/character/${id}`, {
-            headers: { "Authorization": `Bearer ${token}` }
-        })
-            .then(res => res.ok ? res.json() : null)
-            .then(data => setRating(data))
+        if(!AuthService.isAuthenthicated()) return;
+        RatingService.getCharacterById(id!)
+        .then(setRating)
+        .catch(console.error);
     }, [id])
 
     if(!character) return <div>Loading ....</div>
 
     const openModal = async () => {
-        const res = await fetch("http://localhost:5000/my-lists", {
-        headers:{
-            "Authorization": `Bearer ${localStorage.getItem("token")}`
+        try{
+            const data = await ListService.getMyLists();
+            setLists(Array.isArray(data) ? data: [])
+            setShowModal(true)
+        }catch(error: any){
+            if(error.message === "No estas registrado") navigate('/login')
         }
-        });
-        if(res.status === 401) navigate("/login")
-        const data = await res.json();
-        setLists(Array.isArray(data) ? data : []);
-        setShowModal(true);
     };
 
     const addToList = async (listId: number) => {
-        const res = await fetch(`http://localhost:5000/list/${listId}/add-character`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" , "Authorization": `Bearer ${localStorage.getItem("token")}`},
-        body: JSON.stringify({
-            character_id: id,
-            character_name: character.name,
-            character_house: character.house,
-            character_image: character.image,
-            spells: character.spells,
-      }),
-    });
-    const data = await res.json();
+        
+    const data = await ListService.addCharacter(
+        listId, id!, character!.name, character!.house, character!.image, character!.spells
+    );
     setMensaje(data.message || data.error);
     setTimeout(() => {
       setShowModal(false);
@@ -75,35 +62,17 @@ function Details(){
 
   const createList = async () => {
     if (!nuevoTitulo.trim()) return;
-    const res = await fetch("http://localhost:5000/list", {
-      method: "POST",
-
-      headers: { "Content-Type": "application/json" , "Authorization": `Bearer ${localStorage.getItem("token")}`},
-      body: JSON.stringify({ title: nuevoTitulo }),
-    });
-    const nueva = await res.json();
+    const nueva = await ListService.createList(nuevoTitulo);
     setLists([...lists, nueva]);
     setCreando(false);
     setNuevoTitulo("");
   };
 
 const handleRate = async (puntuacion: number) => {
-  const res = await fetch("http://localhost:5000/rating", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${localStorage.getItem("token")}`
-    },
-    body: JSON.stringify({
-      character_id:    id,
-      character_name:  character.name,
-      character_house: character.house,
-      character_image: character.image,
-      rate: puntuacion
-    })
-  })
-  const data = await res.json()
-  setRating(data)
+   const data = await RatingService.rate(
+        id!, character!.name, character!.house, character!.image, puntuacion
+    );
+    setRating(data);
 }
 
 

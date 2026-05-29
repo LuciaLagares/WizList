@@ -48,7 +48,8 @@ const router = createBrowserRouter([
   {
     path: '/:id/perfil',
     element: <PersonProfile />
-  }
+  },
+  
 ]);
 
 function AppRouter(){

@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import NavBar from "./navBarComponent"
+import { ProfileService } from "../services/profileService"
+import { RatingService } from "../services/ratingService"
+import { ListService } from "../services/listService"
 
 interface user {
   id:       number
@@ -44,28 +47,13 @@ function Perfil(){
     const navigate = useNavigate()
 
     useEffect(() => {
-    fetch("http://localhost:5000/perfil", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
-      },
-    })
-      .then((res) => {
-        if (res.status === 401 || res.status===422) {
-          localStorage.removeItem("token");
-          navigate("/login");
-          return;
-        }
-        if (!res.ok) throw new Error("Error en el servidor");
-        return res.json();
-      })
-      .then((data) => {
-        if (data) setData(data);
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false)); 
-  }, [navigate]);
+        ProfileService.getOwnProfile()
+        .then(setData)
+        .catch((err) => {
+            if (err.message === "NO_AUTH") navigate("/login");
+        })
+        .finally(() => setLoading(false));
+    }, [navigate]);
   
   const openEditModal = (valoracion : Valoracion) => {
     setEditModal(valoracion)
@@ -74,62 +62,43 @@ function Perfil(){
   
   const handleEdit = () => {
     if(!editModal) return;
-    fetch(`http://localhost:5000/valoraciones/${editModal.id}`,{
-      method: 'PUT',
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
-      },
-      body: JSON.stringify({rate: editRate})
-    })
-    .then(() => {
-      setData(prev => prev ? {
-        ...prev, 
-        valoraciones: prev.valoraciones.map((v) => 
-          v.id === editModal.id ? {...v, rate: editRate} : v
-      )
-    }: prev)
-    setEditModal(null)
-  })
-  .catch((e) => console.error(e))
-}
+    RatingService.updateRate(editModal.id, editRate)
+        .then(() => {
+            setData(prev => prev ? {
+                ...prev,
+                valoraciones: prev.valoraciones.map(v =>
+                    v.id === editModal.id ? { ...v, rate: editRate } : v
+                )
+            } : prev)
+            setEditModal(null)
+        })
+        .catch(console.error)
+  }
 
 const handleDelete = () => {
   if(!deleteModal) return;
-  fetch(`http://localhost:5000/valoraciones/${deleteModal.id}`, {
-    method: "DELETE",
-    headers: {
-      "Authorization": `Bearer ${localStorage.getItem("token")}`
-    }
-  })
-  .then((res) => {
-    if(!res.ok) throw new Error("Error in deleting")
-      setData(prev => prev ? {
-    ...prev,
-    valoraciones: prev.valoraciones.filter(v => v.id !== deleteModal.id)
-  }: prev)
-  setDeleteModal(null)
-})
-.catch((e) => console.error(e))
+  RatingService.deleteRate(deleteModal.id)
+        .then(() => {
+            setData(prev => prev ? {
+                ...prev,
+                valoraciones: prev.valoraciones.filter(v => v.id !== deleteModal.id)
+            } : prev)
+            setDeleteModal(null)
+        })
+        .catch(console.error)
 }
 
 const handleDeleteList = () => {
   if(!deleteModalList) return;
-  fetch(`http://localhost:5000/listas/${deleteModalList.id}`, {
-    method: "DELETE",
-    headers: {
-      "Authorization": `Bearer ${localStorage.getItem("token")}`
-    }
-  })
-  .then((res) => {
-    if(!res.ok) throw new Error("Error in deleting")
-      setData(prev => prev ? {
-    ...prev,
-    listas: prev.listas.filter(l => l.id !== deleteModalList.id)
-  }: prev)
-  setDeleteModalList(null)
-})
-.catch((e) => console.error(e))
+  ListService.deleteList(deleteModalList.id)
+        .then(() => {
+            setData(prev => prev ? {
+                ...prev,
+                listas: prev.listas.filter(l => l.id !== deleteModalList.id)
+            } : prev)
+            setDeleteModalList(null)
+        })
+        .catch(console.error)
 }
 
 if (loading) {
@@ -169,7 +138,7 @@ const iniciales = data.usuario.username.slice(0, 2).toUpperCase()
                 className="flex items-center justify-between border border-base-300 bg-base-100 rounded-lg p-3"
                 >
                 <span className="font-bold cursor-pointer" onClick={() => navigate(`/list/${lista.id}`)}>{lista.title}</span>
-                <button onClick={() => setDeleteModalList(lista)}>
+                <button onClick={() => setDeleteModalList(lista)} className="ml-56">
                   <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
                     <path d="M0 0h24v24H0z" fill="none" />
                     <path fill="#b0b0b0" d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zM9 17h2V8H9zm4 0h2V8h-2zM7 6v13z" />
