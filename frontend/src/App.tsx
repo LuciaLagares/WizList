@@ -24,9 +24,9 @@ const [characters, setCharacters] = useState([]);
     setCurrentPage(1);
   };
     return (
-    <div className="min-h-screen pb-16">
+    <div className="flex flex-col min-h-screen">
       <NavBar />
-      <div className="divider m-6"></div>
+      <div className="divider "></div>
 
        <div className="flex justify-center px-4 mb-4">
         <input
@@ -38,7 +38,7 @@ const [characters, setCharacters] = useState([]);
         />
       </div>
       
-        <div className="grid grid-cols-3 gap-6 p-4">
+        <div className="flex-1 grid grid-cols-3 gap-4 lg:gap-8 px-4 max-w-4xl mx-auto w-full content-start">
           {characters.map((character: any) => (
             <div key={character.id} className="border border-base-300 rounded-xl p-2 ">
               <Card {...character} />

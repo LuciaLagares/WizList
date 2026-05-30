@@ -15,7 +15,7 @@ interface ListaPublica {
 
 export default function PublicLists() {
   const {toasts, showToast} = useToast();
-  const [listas, setListas] = useState<ListaPublica[]>([]);
+  const [lists, setLists] = useState<ListaPublica[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -24,7 +24,7 @@ export default function PublicLists() {
   useEffect(() => {
     ListService.getAllPublicLists(page, 3)
         .then(data => {
-            setListas(data.listas);
+            setLists(data.lists);
             setTotalPages(data.pages);
         })
         .catch(() => showToast("Error cargando las listas", 'error'))
@@ -45,12 +45,12 @@ export default function PublicLists() {
       <div className="px-4 sm:px-8 max-w-2xl mx-auto w-full">
         <h1 className="text-2xl sm:text-3xl font-bold mt-8 mb-6">Listas públicas</h1>
  
-        {listas.length === 0 ? (
+        {lists.length === 0 ? (
           <p className="text-base-content/70">No hay listas públicas todavía.</p>
         ) : (
           <>
             <div className="flex flex-col gap-4">
-              {listas.map(lista => (
+              {lists.map(lista => (
                 <div key={lista.id} className="border border-base-300 rounded-xl p-4 sm:p-5 bg-base-100 flex justify-between items-start gap-3">
                   <div className="min-w-0">
                     <div
@@ -72,14 +72,6 @@ export default function PublicLists() {
                     >
                       Ver lista →
                     </div>
-                  </div>
-                  <div onClick={() => showToast('Thank you for cliking!', 'success')}>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="shrink-0 w-6 h-6" viewBox="0 0 24 24">
-                      <path d="M0 0h24v24H0z" fill="none" />
-                      <path fill="none" stroke="#b0b0b0" strokeDasharray="30" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c0 0 0 0 -0.76 -1c-0.88 -1.16 -2.18 -2 -3.74 -2c-2.49 0 -4.5 2.01 -4.5 4.5c0 0.93 0.28 1.79 0.76 2.5c0.81 1.21 8.24 9 8.24 9M12 8c0 0 0 0 0.76 -1c0.88 -1.16 2.18 -2 3.74 -2c2.49 0 4.5 2.01 4.5 4.5c0 0.93 -0.28 1.79 -0.76 2.5c-0.81 1.21 -8.24 9 -8.24 9">
-                        <animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="30;0" />
-                      </path>
-                    </svg>
                   </div>
                 </div>
               ))}

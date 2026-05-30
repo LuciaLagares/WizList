@@ -122,7 +122,7 @@ const handleToggleFavorite = (listId: number) => {
 if (loading) {
   return (
     <div className="h-screen flex items-center justify-center">
-      <span className="loading loading-spinner loading-lg"></span> {/* Si usas daisyUI */}
+      <span className="loading loading-spinner loading-lg"></span> 
       <p>Cargando tu perfil mágico...</p>
     </div>
   );

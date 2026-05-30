@@ -25,24 +25,24 @@ def create_list():
     if err:
         return err, status
 
-    nueva_lista = List(
+    new_list = List(
         title=data.get("title"),
         description=data.get("description", ""),
         is_public=data.get("is_public", True),
         user_id=id_usuario
     )
-    db.session.add(nueva_lista)
+    db.session.add(new_list)
     db.session.commit()
-    return jsonify(nueva_lista.to_dict()), 201
+    return jsonify(new_list.to_dict()), 201
 
 
 @lists_bp.route("/my-lists", methods=["GET"])
 @jwt_required()
 def get_my_lists():
-    id_usuario = int(get_jwt_identity())
-    listas = List.query.filter_by(user_id=id_usuario).all()
+    user_id = int(get_jwt_identity())
+    lists = List.query.filter_by(user_id=user_id).all()
     result = []
-    for l in listas:
+    for l in lists:
         result.append(l.to_dict())
     return jsonify(result), 200
 
@@ -50,11 +50,11 @@ def get_my_lists():
 @lists_bp.route("/list/<int:list_id>", methods=["GET"])
 @jwt_required()
 def show_list(list_id):
-    lista = List.query.get_or_404(list_id)
-    user = User.query.get(lista.user_id)
+    list = List.query.get_or_404(list_id)
+    user = User.query.get(list.user_id)
     items = []
 
-    for i in lista.items:
+    for i in list.items:
         if i.character_id:
             character = Character.query.get(i.character_id)
             if character:
@@ -68,11 +68,11 @@ def show_list(list_id):
                 })
 
     return jsonify({
-        "id": lista.id,
-        "title": lista.title,
-        "description": lista.description,
-        "is_public": lista.is_public,
-        "user_id": lista.user_id,
+        "id": list.id,
+        "title": list.title,
+        "description": list.description,
+        "is_public": list.is_public,
+        "user_id": list.user_id,
         "username": user.username if user else "Desconocido",
         "items": items
     }), 200
@@ -81,9 +81,9 @@ def show_list(list_id):
 @lists_bp.route("/list/<int:list_id>/add-character", methods=["POST"])
 @jwt_required()
 def add_to_list(list_id):
-    id_usuario = int(get_jwt_identity())
-    lista = List.query.filter_by(id=list_id, user_id=id_usuario).first()
-    if not lista:
+    user_id = int(get_jwt_identity())
+    list = List.query.filter_by(id=list_id, user_id=user_id).first()
+    if not list:
         return jsonify({"error": "Lista no encontrada"}), 404
 
     data = request.get_json() or {}
@@ -122,9 +122,9 @@ def add_to_list(list_id):
 @lists_bp.route("/lists/<int:list_id>", methods=["PUT"])
 @jwt_required()
 def update_list(list_id):
-    id_usuario = int(get_jwt_identity())
-    lista = List.query.filter_by(id=list_id, user_id=id_usuario).first()
-    if not lista:
+    user_id = int(get_jwt_identity())
+    list = List.query.filter_by(id=list_id, user_id=user_id).first()
+    if not list:
         return jsonify({"error": "Lista no encontrada"}), 404
 
     data = request.get_json() or {}
@@ -138,31 +138,31 @@ def update_list(list_id):
 
     title = data.get("title")
     if title is not None:
-        lista.title = title
+        list.title = title
 
     items = data.get("items")
     if items is not None:
-        lista.items.clear()
+        list.items.clear()
         for item_data in items:
-            lista.items.append(ListItem(
+            list.items.append(ListItem(
                 list_id=list_id,
                 character_id=item_data.get("character_id"),
                 spells=item_data.get("spells")
             ))
 
     db.session.commit()
-    return jsonify(lista.to_dict()), 200
+    return jsonify(list.to_dict()), 200
 
 
 @lists_bp.route("/lists/<int:list_id>", methods=["DELETE"])
 @jwt_required()
 def delete_list(list_id):
-    id_usuario = int(get_jwt_identity())
-    lista = List.query.filter_by(id=list_id, user_id=id_usuario).first()
-    if not lista:
+    user_id = int(get_jwt_identity())
+    list = List.query.filter_by(id=list_id, user_id=user_id).first()
+    if not list:
         return jsonify({"error": "Lista no encontrada"}), 404
 
-    db.session.delete(lista)
+    db.session.delete(list)
     db.session.commit()
     return jsonify({"message": "Lista eliminada"}), 200
 
@@ -173,15 +173,15 @@ def get_public_lists():
     per_page = request.args.get("per_page", 4, type=int)
 
     paginacion = List.query.filter_by(is_public=True).paginate(page=page, per_page=per_page)
-    resultado = []
+    result = []
     for item in paginacion:
         user = User.query.get(item.user_id)
         d = item.to_dict()
         d["username"] = user.username if user else "Desconocido"
-        resultado.append(d)
+        result.append(d)
 
     return jsonify({
-        "listas": resultado,
+        "lists": result,
         "total": paginacion.total,
         "pages": paginacion.pages
     }), 200
@@ -189,11 +189,11 @@ def get_public_lists():
 @lists_bp.route("/list/<int:list_id>/favorite", methods=["PATCH"])
 @jwt_required()
 def toggle_favorite(list_id):
-    id_usuario = int(get_jwt_identity())
-    lista = List.query.filter_by(id=list_id, user_id=id_usuario).first()
-    if not lista:
+    user_id = int(get_jwt_identity())
+    list = List.query.filter_by(id=list_id, user_id=user_id).first()
+    if not list:
         return jsonify({"error": "Lista no encontrada"}), 404
 
-    lista.is_favorite = not lista.is_favorite
+    list.is_favorite = not list.is_favorite
     db.session.commit()
-    return jsonify(lista.to_dict()), 200
+    return jsonify(list.to_dict()), 200

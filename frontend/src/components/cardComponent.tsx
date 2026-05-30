@@ -13,11 +13,11 @@ function Card({ id, name, house, image }: CharacterProps) {
   
 
   return (
-    <div className="card bg-base-100 shadow-sm border border-base-300">
+    <div className="card bg-base-100 shadow-sm border border-base-300 max-w-xs w-full mx-auto">
       <Link to={`/character/${id}/spells`}>
-        <figure>
+        <figure className="overflow-hidden">
           <img
-            className="w-full h-36 sm:h-48 object-cover rounded-t-2xl"
+            className="w-full h-44 sm:h-64 object-cover rounded-t-2xl"
             src={image || "../../images/image_not_provided.png"}
             alt={name}
           />
