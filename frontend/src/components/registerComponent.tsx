@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthService } from "../services/authService";
 import { useToast } from "../hooks/useToast";
-import ToastComponent from "./toatsComponent";
+import ToastComponent from "./toastComponent";
 
 function Registrer(){
   const {toasts, showToast} = useToast();

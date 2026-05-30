@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import NavBar from "./navBarComponent";
 import { ProfileService } from "../services/profileService";
 import { useToast } from "../hooks/useToast";
-import ToastComponent from "./toatsComponent";
+import ToastComponent from "./toastComponent";
 
 export default function PersonProfile(){
     const {id} = useParams();

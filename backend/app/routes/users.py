@@ -8,7 +8,7 @@ from app.models.character import Character
 users_bp = Blueprint("users", __name__)
 
 
-@users_bp.route("/perfil", methods=["GET"])
+@users_bp.route("/profile", methods=["GET"])
 @jwt_required()
 def get_my_profile():
     id_usuario = int(get_jwt_identity())
@@ -38,7 +38,7 @@ def get_my_profile():
     }), 200
 
 
-@users_bp.route("/<int:user_id>/perfil", methods=["GET"])
+@users_bp.route("/<int:user_id>/profile", methods=["GET"])
 def get_public_profile(user_id):
     user = User.query.get_or_404(user_id)
     listas = List.query.filter_by(user_id=user_id, is_public=True).all()

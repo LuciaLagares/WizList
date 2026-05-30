@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { AuthService } from "../services/authService";
 import { useToast } from "../hooks/useToast";
-import ToastComponent from "./toatsComponent";
+import ToastComponent from "./toastComponent";
 import { useState } from "react";
 
 function NavBar() {
@@ -29,7 +29,7 @@ function NavBar() {
                 </Link>
             </li>
             <li>
-                <Link to="/perfil" onClick={() => setMenuOpen(false)}>
+                <Link to="/profile" onClick={() => setMenuOpen(false)}>
                     Perfil
                 </Link>
             </li>

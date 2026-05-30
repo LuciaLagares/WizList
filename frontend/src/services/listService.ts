@@ -45,7 +45,7 @@ export class ListService {
   }
 
   static async deleteList(listId: number) {
-    const response = await fetch(`${BACKEND}/listas/${listId}`, {
+    const response = await fetch(`${BACKEND}/lists/${listId}`, {
       method: "DELETE",
       headers: AuthService.authHeader(),
     });

@@ -8,7 +8,7 @@ import { AuthService } from "../services/authService";
 import { RatingService } from "../services/ratingService";
 import { ListService } from "../services/listService";
 import { useToast } from "../hooks/useToast";
-import ToastComponent from "./toatsComponent";
+import ToastComponent from "./toastComponent";
 
 
 

@@ -5,7 +5,7 @@ import { ProfileService } from "../services/profileService"
 import { RatingService } from "../services/ratingService"
 import { ListService } from "../services/listService"
 import { useToast } from "../hooks/useToast"
-import ToastComponent from "./toatsComponent"
+import ToastComponent from "./toastComponent"
 
 interface user {
   id:       number
@@ -19,7 +19,7 @@ interface Personaje {
   house:      string | null
   image: string | null
 }
-interface Lista {
+interface List {
   id: number
   title: string
   description: string
@@ -28,23 +28,23 @@ interface Lista {
   items:{house: string}[]
 }
 
-interface Valoracion {
+interface Rating {
   id:          number
   rate:        number
   character:   Personaje | null
   spell_id:    string | null
 }
-interface PerfilData {
-  usuario: user
-  listas: Lista[]
-  valoraciones: Valoracion[]
+interface ProfileData {
+  user: user
+  lists: List[]
+  ratings: Rating[]
 }
-function Perfil(){
-    const [data, setData]= useState<PerfilData | null>(null)
+function Profile(){
+    const [data, setData]= useState<ProfileData | null>(null)
     const [loading, setLoading] = useState(true); 
-    const [editModal, setEditModal] = useState<Valoracion | null>(null)
-    const [deleteModal, setDeleteModal] =  useState<Valoracion | null>(null)
-    const [deleteModalList, setDeleteModalList] = useState<Lista | null>(null)
+    const [editModal, setEditModal] = useState<Rating | null>(null)
+    const [deleteModal, setDeleteModal] =  useState<Rating | null>(null)
+    const [deleteModalList, setDeleteModalList] = useState<List | null>(null)
     const [editRate, setEditRate] = useState(0)
 
     const {toasts, showToast} = useToast();
@@ -60,9 +60,9 @@ function Perfil(){
         .finally(() => setLoading(false));
     }, [navigate]);
   
-  const openEditModal = (valoracion : Valoracion) => {
-    setEditModal(valoracion)
-    setEditRate(valoracion.rate)
+  const openEditModal = (rating : Rating) => {
+    setEditModal(rating)
+    setEditRate(rating.rate)
   }
   
   const handleEdit = () => {
@@ -71,7 +71,7 @@ function Perfil(){
         .then(() => {
             setData(prev => prev ? {
                 ...prev,
-                valoraciones: prev.valoraciones.map(v =>
+                ratings: prev.ratings.map(v =>
                     v.id === editModal.id ? { ...v, rate: editRate } : v
                 )
             } : prev)
@@ -87,7 +87,7 @@ const handleDelete = () => {
         .then(() => {
             setData(prev => prev ? {
                 ...prev,
-                valoraciones: prev.valoraciones.filter(v => v.id !== deleteModal.id)
+                ratings: prev.ratings.filter(v => v.id !== deleteModal.id)
             } : prev)
             setDeleteModal(null)
             showToast("Valoración borrada con éxito", 'success')
@@ -101,7 +101,7 @@ const handleDeleteList = () => {
         .then(() => {
             setData(prev => prev ? {
                 ...prev,
-                listas: prev.listas.filter(l => l.id !== deleteModalList.id)
+                lists: prev.lists.filter(l => l.id !== deleteModalList.id)
             } : prev)
             setDeleteModalList(null)
             showToast("Lista borrada con éxito", 'success')
@@ -114,7 +114,7 @@ const handleToggleFavorite = (listId: number) => {
         .then(updated => {
             setData(prev => prev ? {
                 ...prev,
-                listas: prev.listas.map(l => l.id === listId ? { ...l, is_favorite: updated.is_favorite } : l)
+                lists: prev.lists.map(l => l.id === listId ? { ...l, is_favorite: updated.is_favorite } : l)
             } : prev)
         })
         .catch(() => showToast("Error al actualizar favorito", 'error'))
@@ -128,10 +128,10 @@ if (loading) {
   );
 }
 if(!data) return <div>Error al cargar el perfil</div>
-const iniciales = data.usuario.username.slice(0, 2).toUpperCase()
+const iniciales = data.user.username.slice(0, 2).toUpperCase()
 
 const houses : Record<string, number> = {}
-data.listas.forEach(lista =>{
+data.lists.forEach(lista =>{
   (lista.items || []).forEach((item: {house: string})=>{
     if(item.house) houses[item.house] = (houses[item.house]?? 0) + 1;
   });
@@ -149,7 +149,7 @@ const favouriteHouse = Object.entries(houses).sort((a,b) => b[1] - a[1])[0];
           <span className="text-lg font-semibold">{iniciales}</span>
         </div>
         <div>
-          <h1 className="font-bold text-3xl sm:text-4xl">{data.usuario.username}</h1>
+          <h1 className="font-bold text-3xl sm:text-4xl">{data.user.username}</h1>
           {favouriteHouse && (
             <div className="text-base-content/70 text-sm mt-1">
               Casa más presente en listas: <span className="font-semibold text-secondary">{favouriteHouse[0]}</span> ({favouriteHouse[1]} personajes)
@@ -163,11 +163,11 @@ const favouriteHouse = Object.entries(houses).sort((a,b) => b[1] - a[1])[0];
 
     <section className="px-5 sm:px-8">
       <h2 className="font-bold text-lg mb-3">Mis listas</h2>
-      {data.listas.length === 0 ? (
+      {data.lists.length === 0 ? (
         <p>No tienes listas todavía.</p>
       ) : (
         <div className="flex flex-col gap-3">
-          {data.listas.map(lista => (
+          {data.lists.map(lista => (
             <div
               key={lista.id}
               className="flex items-center gap-2 border border-base-300 bg-base-100 rounded-lg p-5"
@@ -230,10 +230,10 @@ const favouriteHouse = Object.entries(houses).sort((a,b) => b[1] - a[1])[0];
 
     <section className="px-4 sm:px-6 pb-8">
       <h2 className="font-bold text-lg mb-3">Mis valoraciones</h2>
-      {data.valoraciones.length === 0
+      {data.ratings.length === 0
         ? <p>No has valorado nada todavía.</p>
         : <div className="flex flex-col gap-3">
-            {data.valoraciones.map((v) => (
+            {data.ratings.map((v) => (
               <div key={v.id} className="flex items-center gap-3 border border-base-300 rounded-lg p-3">
                 <img className="w-10 h-12 object-cover rounded shrink-0" src={v.character?.image || "../../images/image_not_provided.png"} alt={v.character?.name} />
                 <span className="flex-1 truncate">{v.character?.name}</span>
@@ -302,6 +302,7 @@ const favouriteHouse = Object.entries(houses).sort((a,b) => b[1] - a[1])[0];
       </dialog>
     )}
   </main>
-)
+  )
 }
-export default Perfil;
+
+export default Profile

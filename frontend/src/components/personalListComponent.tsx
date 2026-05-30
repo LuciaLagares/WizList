@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import NavBar from "./navBarComponent";
 import { ListService } from "../services/listService";
 import { useToast } from "../hooks/useToast";
-import ToastComponent from "./toatsComponent";
+import ToastComponent from "./toastComponent";
 
 interface Spell {
   name: string

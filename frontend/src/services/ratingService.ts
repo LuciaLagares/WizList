@@ -35,7 +35,7 @@ export class RatingService {
   }
 
   static async updateRate(ratingId: number, rate: number) {
-    const response = await fetch(`${BACKEND}/valoraciones/${ratingId}`, {
+    const response = await fetch(`${BACKEND}/ratings/${ratingId}`, {
       method: "PUT",
       headers: AuthService.jsonHeader(),
       body: JSON.stringify({ rate }),
@@ -47,7 +47,7 @@ export class RatingService {
   }
 
   static async deleteRate(ratingId: number) {
-    const response = await fetch(`${BACKEND}/valoraciones/${ratingId}`, {
+    const response = await fetch(`${BACKEND}/ratings/${ratingId}`, {
       method: "DELETE",
       headers: AuthService.authHeader(),
     });

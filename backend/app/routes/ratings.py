@@ -70,7 +70,7 @@ def get_rating_by_character(character_id):
     return jsonify(rating.to_dict()), 200
 
 
-@ratings_bp.route("/valoraciones/<int:rating_id>", methods=["PUT"])
+@ratings_bp.route("/ratings/<int:rating_id>", methods=["PUT"])
 @jwt_required()
 def update_rating(rating_id):
     user_id = get_jwt_identity()
@@ -95,7 +95,7 @@ def update_rating(rating_id):
     return jsonify(rating.to_dict()), 200
 
 
-@ratings_bp.route("/valoraciones/<int:rating_id>", methods=["DELETE"])
+@ratings_bp.route("/ratings/<int:rating_id>", methods=["DELETE"])
 @jwt_required()
 def delete_rating(rating_id):
     user_id = get_jwt_identity()

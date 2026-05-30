@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import NavBar from "./navBarComponent";
 import { ListService } from "../services/listService";
 import { useToast } from "../hooks/useToast";
-import ToastComponent from "./toatsComponent";
+import ToastComponent from "./toastComponent";
 
 interface ListaPublica {
   id: number;
@@ -55,7 +55,7 @@ export default function PublicLists() {
                   <div className="min-w-0">
                     <div
                       className="flex items-center gap-3 mb-3 cursor-pointer"
-                      onClick={() => navigate(`/${lista.user_id}/perfil`)}
+                      onClick={() => navigate(`/${lista.user_id}/profile`)}
                     >
                       <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary flex items-center justify-center text-primary-content font-bold text-xs sm:text-sm shrink-0">
                         {lista.username.slice(0, 2).toUpperCase()}

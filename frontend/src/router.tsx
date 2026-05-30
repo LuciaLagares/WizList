@@ -6,7 +6,7 @@ import Detail from "./components/detailComponent"
 import App from "./App";
 import Registrer from "./components/registerComponent";
 import Login from "./components/loginComponent";
-import Perfil from "./components/perfilComponent";
+import Profile from "./components/profileComponent";
 import Home from "./components/homeComponent";
 import DetailList from "./components/personalListComponent";
 import PublicLists from "./components/publicListComponent";
@@ -34,8 +34,8 @@ const router = createBrowserRouter([
     element: <Login />
   },
   {
-    path: '/perfil',
-    element: <Perfil />
+    path: '/profile',
+    element: <Profile />
   },
   {
     path: '/list/:id',
@@ -46,7 +46,7 @@ const router = createBrowserRouter([
     element:<PublicLists />
   },
   {
-    path: '/:id/perfil',
+    path: '/:id/profile',
     element: <PersonProfile />
   },
   

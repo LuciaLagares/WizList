@@ -119,7 +119,7 @@ def add_to_list(list_id):
     return jsonify({"message": "Personaje añadido"}), 201
 
 
-@lists_bp.route("/listas/<int:list_id>", methods=["PUT"])
+@lists_bp.route("/lists/<int:list_id>", methods=["PUT"])
 @jwt_required()
 def update_list(list_id):
     id_usuario = int(get_jwt_identity())
@@ -154,11 +154,11 @@ def update_list(list_id):
     return jsonify(lista.to_dict()), 200
 
 
-@lists_bp.route("/listas/<int:lista_id>", methods=["DELETE"])
+@lists_bp.route("/lists/<int:list_id>", methods=["DELETE"])
 @jwt_required()
-def delete_list(lista_id):
+def delete_list(list_id):
     id_usuario = int(get_jwt_identity())
-    lista = List.query.filter_by(id=lista_id, user_id=id_usuario).first()
+    lista = List.query.filter_by(id=list_id, user_id=id_usuario).first()
     if not lista:
         return jsonify({"error": "Lista no encontrada"}), 404
 

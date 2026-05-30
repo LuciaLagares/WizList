@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useToast } from "../hooks/useToast";
 import { ListService } from "../services/listService";
-import ToastComponent from "./toatsComponent";
+import ToastComponent from "./toastComponent";
 
 export interface SpellProps {
   id: string;
