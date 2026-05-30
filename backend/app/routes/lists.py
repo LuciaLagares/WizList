@@ -41,7 +41,10 @@ def create_list():
 def get_my_lists():
     id_usuario = int(get_jwt_identity())
     listas = List.query.filter_by(user_id=id_usuario).all()
-    return jsonify([l.to_dict() for l in listas]), 200
+    result = []
+    for l in listas:
+        result.append(l.to_dict())
+    return jsonify(result), 200
 
 
 @lists_bp.route("/list/<int:list_id>", methods=["GET"])
@@ -182,3 +185,15 @@ def get_public_lists():
         "total": paginacion.total,
         "pages": paginacion.pages
     }), 200
+
+@lists_bp.route("/list/<int:list_id>/favorite", methods=["PATCH"])
+@jwt_required()
+def toggle_favorite(list_id):
+    id_usuario = int(get_jwt_identity())
+    lista = List.query.filter_by(id=list_id, user_id=id_usuario).first()
+    if not lista:
+        return jsonify({"error": "Lista no encontrada"}), 404
+
+    lista.is_favorite = not lista.is_favorite
+    db.session.commit()
+    return jsonify(lista.to_dict()), 200

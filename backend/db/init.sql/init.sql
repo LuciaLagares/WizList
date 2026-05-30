@@ -56,7 +56,6 @@ CREATE TABLE IF NOT EXISTS `list_item` (
 CREATE TABLE IF NOT EXISTS `rating` (
     id INT NOT NULL AUTO_INCREMENT,
     rate INT CHECK (rate BETWEEN 1 AND 5),
-    is_favorite  TINYINT(1) NOT NULL DEFAULT 0,
     user_id   INT NOT NULL,
     character_id VARCHAR(100),
     spell_id VARCHAR(100),

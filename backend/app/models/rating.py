@@ -7,7 +7,6 @@ class Rating(db.Model):
     __tablename__ = 'rating'
     id = db.Column(db.Integer, primary_key=True)
     rate = db.Column(db.Integer) 
-    is_favorite = db.Column(db.Boolean, default=False) 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     character_id = db.Column(db.String(100), db.ForeignKey('character.id'), nullable=True)
@@ -19,7 +18,6 @@ class Rating(db.Model):
             return {
                 "id": self.id,
                 "rate": self.rate,
-                "is_favorite": self.is_favorite,
                 "character_id": self.character_id,
                 "spell_id": self.spell_id,
                 "character": self.character.to_dict() if self.character else None,

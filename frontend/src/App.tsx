@@ -1,28 +1,42 @@
 import { useEffect, useState } from "react"
 import Card from "./components/cardComponent";
 import NavBar from "./components/navBarComponent";
+import { CharactersService } from "./services/charactersService";
 
 
 function App() {
 const [characters, setCharacters] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("")
 
   useEffect(() =>{
-    fetch(`http://localhost:5000/show-characters?page=${currentPage}&per_page=6`)
-    .then(res => res.json())
+    CharactersService.getAllCharacters(currentPage, 6, search)
     .then(data => {
       setCharacters(data.characters); 
       setTotalPages(data.pages)
     });
 
-  }, [currentPage]);
+  }, [currentPage, search]);
 
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+    setCurrentPage(1);
+  };
     return (
     <div className="min-h-screen pb-16">
       <NavBar />
       <div className="divider m-6"></div>
 
+       <div className="flex justify-center px-4 mb-4">
+        <input
+          type="text"
+          placeholder="Buscar personaje"
+          value={search}
+          onChange={handleSearch}
+          className="input input-bordered w-full max-w-md"
+        />
+      </div>
       
         <div className="grid grid-cols-3 gap-6 p-4">
           {characters.map((character: any) => (

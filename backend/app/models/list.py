@@ -9,6 +9,7 @@ class List(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(255))
     is_public = db.Column(db.Boolean, default=True)
+    is_favorite = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
     items = db.relationship('ListItem', backref='parent_list', cascade="all, delete-orphan")
@@ -19,5 +20,6 @@ class List(db.Model):
                 "title": self.title,
                 "description": self.description,
                 "is_public": self.is_public,
+                "is_favorite": self.is_favorite,
                 "user_id": self.user_id
             }

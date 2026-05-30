@@ -24,7 +24,7 @@ function Details(){
     const [mensaje, setMensaje] = useState("");
     const [creando, setCreando] = useState(false);
     const [nuevoTitulo, setNuevoTitulo] = useState("");
-    const [rating, setRating] = useState<{ id: number; rate: number; is_favorite: boolean } | null>(null)
+    const [rating, setRating] = useState<{ id: number; rate: number; } | null>(null)
     
     useEffect(() =>{
         CharactersService.getCharacterById(id!)
@@ -78,7 +78,6 @@ const handleRate = async (puntuacion: number) => {
     setRating(data);
 }
 
-
     return(
         <div className="flex flex-col min-h-screen mx-6 bg-base-100">
             <ToastComponent toasts={toasts} />
@@ -86,7 +85,7 @@ const handleRate = async (puntuacion: number) => {
             <div className="flex-1 mb-16 mt-8">
                 <h1 className="text-4xl font-bold text-center mb-4">{character.name}</h1>
                {character.alternate_names && character.alternate_names.length > 0 && (
-                    <h2 className="text-lg text-secondary-content text-center mb-3">
+                    <h2 className="text-lg text-secondary text-center mb-3">
                         {character.alternate_names.join(", ")}
                     </h2>
                 )}

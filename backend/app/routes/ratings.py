@@ -53,7 +53,6 @@ def create_or_update_rating():
             user_id=user_id,
             character_id=character_id,
             rate=rate,
-            is_favorite=is_favourite or False
         )
         db.session.add(rating)
 

@@ -78,4 +78,13 @@ export class ListService {
       throw new Error("Error al añadir personaje");
     return response.json();
   }
+
+  static async selectFavorites(listId: number) {
+    const response = await fetch(`${BACKEND}/list/${listId}/favorite`, {
+      method: "PATCH",
+      headers: AuthService.authHeader(),
+    });
+    if (!response.ok) throw new Error("Error al actualizar la lista favorita");
+    return response.json();
+  }
 }
