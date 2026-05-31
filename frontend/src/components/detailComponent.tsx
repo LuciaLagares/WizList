@@ -23,6 +23,7 @@ function Details(){
     const [lists, setLists] = useState<{ id: number; title: string }[]>([]);
     const [mensaje, setMensaje] = useState("");
     const [creando, setCreando] = useState(false);
+    const [isPublic, setIsPublic] = useState(true);
     const [nuevoTitulo, setNuevoTitulo] = useState("");
     const [rating, setRating] = useState<{ id: number; rate: number; } | null>(null)
     
@@ -65,10 +66,11 @@ function Details(){
 
   const createList = async () => {
     if (!nuevoTitulo.trim()) return;
-    const nueva = await ListService.createList(nuevoTitulo);
+    const nueva = await ListService.createList(nuevoTitulo, "", isPublic);
     setLists([...lists, nueva]);
     setCreando(false);
     setNuevoTitulo("");
+    setIsPublic(true)
   };
 
 const handleRate = async (puntuacion: number) => {
@@ -150,6 +152,19 @@ const handleRate = async (puntuacion: number) => {
                     onChange={e => setNuevoTitulo(e.target.value)}
                     className="border border-base-300 bg-base-100 text-base-content rounded px-3 py-2 w-full"
                     />
+                    <label className="label cursor-pointer justify-between px-1">
+                        <span className="label-text text-sm">Visibilidad</span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-base-content/70">Privada</span>
+                            <input
+                                type="checkbox"
+                                className="toggle toggle-primary toggle-sm"
+                                checked={isPublic}
+                                onChange={e => setIsPublic(e.target.checked)}
+                            />
+                            <span className="text-xs text-base-content/70">Pública</span>
+                        </div>
+                    </label>
                     <button onClick={createList} className="btn btn-primary w-full">
                     Crear
                     </button>

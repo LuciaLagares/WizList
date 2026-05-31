@@ -30,10 +30,10 @@ const router = createBrowserRouter([
     path: "/login",
     element: <Login />,
   },
+  { path: "/", element: <Home /> },
   {
     element: <ProtectedRoute />,
     children: [
-      { path: "/", element: <Home /> },
       { path: "/show-characters", element: <App /> },
       { path: "/character/:id/spells", element: <Detail /> },
       { path: "/profile", element: <Profile /> },

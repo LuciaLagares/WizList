@@ -32,11 +32,15 @@ export class ListService {
     return response.json();
   }
 
-  static async createList(title: string, description = "", isPublic = true) {
+  static async createList(
+    title: string,
+    description = "",
+    isPublic: boolean = true,
+  ) {
     const response = await fetch(`${BACKEND}/list`, {
       method: "POST",
       headers: AuthService.jsonHeader(),
-      body: JSON.stringify({ title, description, isPublic: isPublic }),
+      body: JSON.stringify({ title, description, is_public: isPublic }),
     });
 
     if (!response.ok) throw new Error("Error creando la lista");
