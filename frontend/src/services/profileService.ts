@@ -1,6 +1,6 @@
 import { AuthService } from "./authService";
 
-const BACKEND = "http://localhost:5000";
+const BACKEND = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export class ProfileService {
   static async getOwnProfile() {

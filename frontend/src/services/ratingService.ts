@@ -1,7 +1,6 @@
 import { AuthService } from "./authService";
 
-const BACKEND = "http://localhost:5000";
-
+const BACKEND = import.meta.env.VITE_API_URL || "http://localhost:5000";
 export class RatingService {
   static async getCharacterById(characterID: string) {
     const response = await fetch(`${BACKEND}/rating/character/${characterID}`, {
