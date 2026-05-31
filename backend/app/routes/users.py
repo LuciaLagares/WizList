@@ -47,6 +47,6 @@ def get_public_profile(user_id):
     for l in lists:
         resul.append(l.to_dict())
     return jsonify({
-        "usuuserario": user.to_dict(),
+        "user": user.to_dict(),
         "lists": resul,
     }), 200

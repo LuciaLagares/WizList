@@ -9,3 +9,4 @@ requests==2.32.3
 flask-session
 flask_migrate
 python-dotenv
+pytest>=7.0.0
