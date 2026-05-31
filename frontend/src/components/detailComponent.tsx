@@ -3,6 +3,12 @@ import { useEffect, useState } from "react";
 import type { CharacterProps } from "./cardComponent";
 import NavBar from "./navBarComponent";
 import { useNavigate, useParams } from "react-router-dom";
+import { CharactersService } from "../services/charactersService";
+import { AuthService } from "../services/authService";
+import { RatingService } from "../services/ratingService";
+import { ListService } from "../services/listService";
+import { useToast } from "../hooks/useToast";
+import ToastComponent from "./toastComponent";
 
 
 
@@ -10,62 +16,47 @@ function Details(){
     const {id} = useParams();
     const navigate = useNavigate();
 
-    
+    const {toasts, showToast} = useToast();
+
     const [character, setCharacter] = useState<CharacterProps | null>(null)
     const [showModal, setShowModal] = useState(false);
     const [lists, setLists] = useState<{ id: number; title: string }[]>([]);
     const [mensaje, setMensaje] = useState("");
     const [creando, setCreando] = useState(false);
+    const [isPublic, setIsPublic] = useState(true);
     const [nuevoTitulo, setNuevoTitulo] = useState("");
-    const [rating, setRating] = useState<{ id: number; rate: number; is_favorite: boolean } | null>(null)
+    const [rating, setRating] = useState<{ id: number; rate: number; } | null>(null)
     
     useEffect(() =>{
-        fetch(`http://localhost:5000/character/${id}/spells`)
-        .then(res => res.json())
-        .then(data => {
-            setCharacter(data);
-            console.log(data);
-        });
+        CharactersService.getCharacterById(id!)
+        .then(setCharacter)
+        .catch(() => showToast("Error al cargar el personaje", 'error'))
     }, [id]);
 
     useEffect(() => {
-        const token = localStorage.getItem("token")
-        if (!token) return
-
-        fetch(`http://localhost:5000/rating/character/${id}`, {
-            headers: { "Authorization": `Bearer ${token}` }
-        })
-            .then(res => res.ok ? res.json() : null)
-            .then(data => setRating(data))
+        if(!AuthService.isAuthenthicated()) return;
+        RatingService.getCharacterById(id!)
+        .then(setRating)
+        .catch(() => showToast("Error al cargar la valoración", 'error'))
     }, [id])
 
     if(!character) return <div>Loading ....</div>
 
     const openModal = async () => {
-        const res = await fetch("http://localhost:5000/my-lists", {
-        headers:{
-            "Authorization": `Bearer ${localStorage.getItem("token")}`
+        try{
+            const data = await ListService.getMyLists();
+            setLists(Array.isArray(data) ? data: [])
+            setShowModal(true)
+        }catch(error: any){
+            if(error.message === "No estas registrado") navigate('/login')
         }
-        });
-        if(res.status === 401) navigate("/login")
-        const data = await res.json();
-        setLists(Array.isArray(data) ? data : []);
-        setShowModal(true);
     };
 
     const addToList = async (listId: number) => {
-        const res = await fetch(`http://localhost:5000/list/${listId}/add-character`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" , "Authorization": `Bearer ${localStorage.getItem("token")}`},
-        body: JSON.stringify({
-            character_id: id,
-            character_name: character.name,
-            character_house: character.house,
-            character_image: character.image,
-            spells: character.spells,
-      }),
-    });
-    const data = await res.json();
+        
+    const data = await ListService.addCharacter(
+        listId, id!, character!.name, character!.house, character!.image, character!.spells
+    );
     setMensaje(data.message || data.error);
     setTimeout(() => {
       setShowModal(false);
@@ -75,45 +66,28 @@ function Details(){
 
   const createList = async () => {
     if (!nuevoTitulo.trim()) return;
-    const res = await fetch("http://localhost:5000/list", {
-      method: "POST",
-
-      headers: { "Content-Type": "application/json" , "Authorization": `Bearer ${localStorage.getItem("token")}`},
-      body: JSON.stringify({ title: nuevoTitulo }),
-    });
-    const nueva = await res.json();
+    const nueva = await ListService.createList(nuevoTitulo, "", isPublic);
     setLists([...lists, nueva]);
     setCreando(false);
     setNuevoTitulo("");
+    setIsPublic(true)
   };
 
 const handleRate = async (puntuacion: number) => {
-  const res = await fetch("http://localhost:5000/rating", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${localStorage.getItem("token")}`
-    },
-    body: JSON.stringify({
-      character_id:    id,
-      character_name:  character.name,
-      character_house: character.house,
-      character_image: character.image,
-      rate: puntuacion
-    })
-  })
-  const data = await res.json()
-  setRating(data)
+   const data = await RatingService.rate(
+        id!, character!.name, character!.house, character!.image, puntuacion
+    );
+    setRating(data);
 }
-
 
     return(
         <div className="flex flex-col min-h-screen mx-6 bg-base-100">
+            <ToastComponent toasts={toasts} />
             <NavBar />
             <div className="flex-1 mb-16 mt-8">
                 <h1 className="text-4xl font-bold text-center mb-4">{character.name}</h1>
                {character.alternate_names && character.alternate_names.length > 0 && (
-                    <h2 className="text-lg text-secondary-content text-center mb-3">
+                    <h2 className="text-lg text-secondary text-center mb-3">
                         {character.alternate_names.join(", ")}
                     </h2>
                 )}
@@ -178,6 +152,19 @@ const handleRate = async (puntuacion: number) => {
                     onChange={e => setNuevoTitulo(e.target.value)}
                     className="border border-base-300 bg-base-100 text-base-content rounded px-3 py-2 w-full"
                     />
+                    <label className="label cursor-pointer justify-between px-1">
+                        <span className="label-text text-sm">Visibilidad</span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-base-content/70">Privada</span>
+                            <input
+                                type="checkbox"
+                                className="toggle toggle-primary toggle-sm"
+                                checked={isPublic}
+                                onChange={e => setIsPublic(e.target.checked)}
+                            />
+                            <span className="text-xs text-base-content/70">Pública</span>
+                        </div>
+                    </label>
                     <button onClick={createList} className="btn btn-primary w-full">
                     Crear
                     </button>

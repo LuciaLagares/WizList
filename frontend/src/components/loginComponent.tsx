@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { AuthService } from "../services/authService";
+import { useToast } from "../hooks/useToast";
+import ToastComponent from "./toastComponent";
 
 function Login() {
+    const { toasts, showToast } = useToast();
+    
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
@@ -11,28 +16,17 @@ function Login() {
         e.preventDefault();
 
         try {
-            const response = await fetch('http://localhost:5000/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
-            });
-
-            if (response.ok) {
-                const { access_token } = await response.json();
-                localStorage.setItem("token", access_token)
-                navigate("/show-characters")
-            } else if (response.status === 401) {
-                alert('Usuario o contraseña incorrectos');
-            } else {
-                alert('Error al iniciar sesión');
-            }
-        } catch (error) {
-            console.error('Error de conexión');
+            await AuthService.login(username, password);
+            navigate("/show-characters");
+            showToast("Login correcto!", 'success')
+        } catch { 
+            showToast("Error al loggearte", 'error');
         }
     };
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-base-100">
+            <ToastComponent toasts={toasts} />
             <div className="card w-96 bg-base-100 shadow-xl">
                 <div className="card-body">
                     <h2 className="card-title justify-center text-2xl font-bold">WizList Login</h2>

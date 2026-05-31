@@ -1,5 +1,8 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { useToast } from "../hooks/useToast";
+import { ListService } from "../services/listService";
+import ToastComponent from "./toastComponent";
 
 export interface SpellProps {
   id: string;
@@ -17,44 +20,38 @@ export interface CharacterProps {
 }
 
 function Card({ id, name, house, image, spells }: CharacterProps) {
+  const { toasts, showToast } = useToast();
+  
   const [showModal, setShowModal] = useState(false);
   const [lists, setLists] = useState<{ id: number; title: string }[]>([]);
   const [mensaje, setMensaje] = useState("");
 
   const openModal = async () => {
-    const res = await fetch("http://localhost:5000/my-lists", {
-     headers:{
-      "Authorization": `Bearer ${localStorage.getItem("token")}`
-     }
-    });
-    const data = await res.json();
-    setLists(data);
-    setShowModal(true);
+    try {
+        const data = await ListService.getMyLists();
+        setLists(Array.isArray(data) ? data : []);
+        setShowModal(true);
+    } catch {
+        showToast("Error al cargar tus listas", 'error');
+    }
   };
 
   const addToList = async (listId: number) => {
-    const res = await fetch(`http://localhost:5000/list/${listId}/add-character`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("token")}` },
-      body: JSON.stringify({
-        character_id: id,
-        character_name: name,
-        character_house: house,
-        character_image: image,
-        spells: spells,
-      }),
-    });
-
-    const data = await res.json();
-    setMensaje(data.message || data.error);
-    setTimeout(() => {
-      setShowModal(false);
-      setMensaje("");
-    }, 1500);
+    try {
+        const data = await ListService.addCharacter(listId, id, name, house, image, spells);
+        setMensaje(data.message || data.error);
+        setTimeout(() => {
+            setShowModal(false);
+            setMensaje("");
+        }, 1500);
+    } catch {
+        showToast("Error al añadir el personaje a la lista", 'error');
+    }
   };
 
   return (
     <>
+    <ToastComponent toasts={toasts} />
       <div className="card card-side bg-secondary shadow-sm h-48">
         <Link to={`/character/${id}/spells`}>
           <figure className="h-full w-40">

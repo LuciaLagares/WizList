@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import NavBar from "./navBarComponent";
+import { ListService } from "../services/listService";
+import { useToast } from "../hooks/useToast";
+import ToastComponent from "./toastComponent";
 
 interface Spell {
   name: string
@@ -29,30 +32,23 @@ interface DetailList {
 
 export default function DetailList(){
     const { id } = useParams();
+    const {toasts, showToast} = useToast();
     const [lista, setLista] = useState<DetailList | null>(null);
     const [loading, setLoading] = useState(true);
     
     useEffect(() =>{
-        fetch(`http://localhost:5000/list/${id}`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${localStorage.getItem("token")}`
-            },
-        })
-        .then((res) => {
-            if(!res.ok) throw new Error("Error al cargar la lista");
-            return res.json();
-        })
-        .then((data) => setLista(data))
-        setLoading(false);
-    }, [id]);
+         ListService.getListById(Number(id))
+        .then(setLista)
+        .catch(() => showToast("Error al cargar las listas", 'error'))
+        .finally(() => setLoading(false));
+}, [id]);
 
     if(loading) return <div>Cargando tu lista...</div>
     if(!lista) return <div>Error al cargar tu lista</div>
 
 return (
   <div className="flex flex-col min-h-screen mx-6 bg-base-100">
+    <ToastComponent toasts={toasts} />
     <NavBar />
     <div className="divider m-6"></div>
     <div className=" mb-4">
