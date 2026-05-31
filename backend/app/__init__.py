@@ -11,15 +11,12 @@ def create_app():
     app = Flask(__name__)
 
     # Configuración
-    app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "cambia_esto_en_produccion")
+    app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY")
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=10)
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-        "SQLALCHEMY_DATABASE_URI",
-        (
-            f"mysql+pymysql://{os.environ.get('DB_USER')}:{os.environ.get('DB_PASSWORD')}"
-            f"@{os.environ.get('DB_HOST')}:{os.environ.get('DB_PORT')}/{os.environ.get('DB_NAME')}"
-        ),
-    )
+    app.config["SQLALCHEMY_DATABASE_URI"] = (
+    os.environ.get("SQLALCHEMY_DATABASE_URI") or
+    os.environ.get("DATABASE_URL")
+)
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # Extensiones
