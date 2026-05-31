@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthService } from "../services/authService";
 import { useToast } from "../hooks/useToast";
 import ToastComponent from "./toastComponent";
@@ -63,6 +63,13 @@ function Registrer(){
                     Registrarse
                 </button>
             </div>
+
+            <p className="text-center text-sm">
+              ¿Ya tienes cuenta?{' '}
+              <Link to="/login" className="text-primary underline">
+                Inicia sesión aquí
+              </Link>
+            </p>
           </form>
         </div>
       </div>
