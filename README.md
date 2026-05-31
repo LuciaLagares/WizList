@@ -1,22 +1,55 @@
+<div align="center">
+
 # WizList
 
-WizList es una aplicación fullstack para crear listas de personajes, compartir listas públicas, y valorar personajes.
+REST API y frontend para crear listas de personajes, compartir listas públicas y valorar personajes.
 
-## Tecnologías
+[![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-3.0-000000?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)](https://mysql.com)
+[![Docker Compose](https://img.shields.io/badge/Docker%20Compose-1.29-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
 
-- Backend: Python 3.11, Flask, SQLAlchemy, Flask-JWT-Extended
-- Frontend: React, Vite, TypeScript, TailwindCSS / DaisyUI
-- Base de datos: MySQL 8.0
-- Contenedores: Docker, Docker Compose
+</div>
 
-## Estructura del proyecto
+<br/>
 
-- `backend/`: servidor Flask, modelos, rutas y tests
-- `frontend/`: aplicación React + Vite
-- `docker-compose.yml`: orquesta MySQL + backend + frontend
-- `db/init.sql`: inicialización de la base de datos
+## Why this project?
 
-## Ejecutar con Docker
+WizList es una aplicación fullstack orientada a listas de personajes y valoraciones. El backend expone rutas HTTP que validan la entrada y entregan respuestas JSON, mientras que el frontend consume esas rutas desde React/Vite.
+
+La idea central es mantener cada capa enfocada: rutas para HTTP, modelos para persistencia y lógica de negocio donde convenga.
+
+## Architecture
+
+```
+HTTP Request
+     │
+     ▼
+  Routes          ← valida input, responde JSON
+     │
+     ▼
+  Models / Clients← consultas y llamadas externas
+     │
+     ▼
+  Database        ← MySQL 8.0
+```
+
+## Database
+
+La base de datos se inicializa con `db/init.sql`.
+
+## Quick Start
+
+**Requirements:** Python 3.11, Docker.
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+cd backend
+pip install -r requirements.txt
+```
+
+### Con Docker Compose
 
 ```bash
 docker compose up --build
@@ -28,9 +61,7 @@ Esto levantará:
 - backend en `http://localhost:5000`
 - frontend en `http://localhost:5173`
 
-## Ejecutar local sin Docker
-
-### Backend
+### Sin Docker (solo backend)
 
 ```bash
 cd backend
@@ -40,7 +71,7 @@ pip install -r requirements.txt
 flask --app main.py run --host=0.0.0.0 --port=5000
 ```
 
-### Frontend
+### Frontend local
 
 ```bash
 cd frontend
@@ -48,36 +79,55 @@ npm install
 npm run dev
 ```
 
-## Variables de entorno
+## Commands
 
-### Backend
+| Command                     | Description                                     |
+| --------------------------- | ----------------------------------------------- |
+| `docker compose up --build` | Levantar todos los servicios con Docker Compose |
+| `npm run dev`               | Iniciar frontend en desarrollo                  |
+| `npm run build`             | Compilar frontend para producción               |
+| `npm run lint`              | Ejecutar ESLint en frontend                     |
+| `python -m pytest -q`       | Ejecutar tests del backend                      |
 
-- `DB_HOST`
-- `DB_PORT`
-- `DB_NAME`
-- `DB_USER`
-- `DB_PASSWORD`
-- `SECRET_KEY`
-- `FLASK_ENV`
+## Configuration
 
-### Frontend
+| Variable       | Description                      | Default                 |
+| -------------- | -------------------------------- | ----------------------- |
+| `DB_HOST`      | Host de la base de datos         | `db` en Docker          |
+| `DB_PORT`      | Puerto de MySQL                  | `3306`                  |
+| `DB_NAME`      | Nombre de la base de datos       | `wizlist`               |
+| `DB_USER`      | Usuario de MySQL                 | `wizuser`               |
+| `DB_PASSWORD`  | Contraseña de MySQL              | `wizpassword`           |
+| `SECRET_KEY`   | Clave secreta de Flask/JWT       | —                       |
+| `FLASK_ENV`    | Entorno de Flask                 | `development`           |
+| `VITE_API_URL` | URL del backend para el frontend | `http://localhost:5000` |
 
-- `VITE_API_URL`
+## Project Structure
 
-## Scripts útiles
+```
+backend/
+├── Dockerfile
+├── main.py
+├── requirements.txt
+├── app/
+│   ├── db.py
+│   ├── validations.py
+│   ├── clients/
+│   ├── models/
+│   └── routes/
+├── db/
+│   └── init.sql
+└── tests/
 
-### Frontend
+frontend/
+├── Dockerfile
+├── package.json
+├── tsconfig.json
+└── src/
+```
 
-- `npm run dev` — iniciar servidor de desarrollo
-- `npm run build` — compilar para producción
-- `npm run lint` — ejecutar ESLint
+## Notes
 
-### Backend
-
-- `python -m pytest -q` — ejecutar tests
-
-## Notas
-
-- La base de datos se inicializa con `db/init.sql`.
-- El backend depende de que MySQL esté disponible antes de arrancar.
-- Si usas Docker Compose, el servicio `backend` espera que `db` esté saludable.
+- El backend depende de que MySQL esté disponible.
+- `docker compose up --build` es la forma recomendada para levantar todo el stack.
+- El frontend consume el backend en `http://localhost:5000`.
