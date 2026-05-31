@@ -5,7 +5,7 @@ function Home(){
         <div className="h-screen w-full flex flex-col overflow-hidden bg-base-100">
             <div 
                 className="flex-1 w-full bg-cover bg-center flex flex-col items-center justify-center gap-5 px-4" 
-                style={{ backgroundImage: "url('../../images/home.png')" }}
+                style={{ backgroundImage: "url('/images/home.png')" }}
             >           
                 <h1 className="text-secondary-content text-4xl sm:text-6xl font-bold drop-shadow-2xl text-center">
                     Bienvenido a WizList
